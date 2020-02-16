@@ -1,29 +1,52 @@
 {
   "name": "xrm-fx",
   "version": "1.0.0",
-  "description": "Test Driven Development in Dynamic CRM 365 front end.",
+  "description": "Typescript Xrm Javascript framework",
+  "main": "index.js",
   "scripts": {
-    "build:dev": "webpack --config webpack.dev.config.js",
-    "start:dev": "webpack-dev-server --config webpack.dev.config.js",
-    "test": "karma start karma.conf.js"
+    "build": "tsc && webpack -d",
+    "build-webpack": "webpack -d",
+    "test": "jest"
   },
-  "author": "Temmy Wahyu Raharjo, Khairuddin Niam",
-  "license": "Apache-2.0",
+  "directories": {
+    "src": "src",
+    "test": "test"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "testURL": "http://localhost/",
+    "testMatch": [
+      "**/test/**/*.+(ts)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      ".d.ts",
+      "/dist/",
+      "/dist.browser/",
+      "/src/"
+    ]
+  },
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "@types/jasmine": "^3.3.13",
-    "@types/xrm": "^9.0.18",
-    "karma": "^4.1.0",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-cli": "^2.0.0",
-    "karma-jasmine": "^2.0.1",
-    "karma-spec-reporter": "0.0.32",
-    "karma-webpack": "^4.0.2",
-    "ts-loader": "^6.0.4",
-    "typescript": "^3.5.2",
-    "webpack": "^4.35.0",
-    "webpack-cli": "^3.3.4",
-    "webpack-dev-server": "^3.7.2",
-    "xrm-mock": "^3.4.15"
+    "@types/jest": "^25.1.2",
+    "@types/node": "^13.7.1",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.7.5",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "xrm-mock": "^3.4.17"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/xrm": "^9.0.20",
+    "awesome-typescript-loader": "^5.2.1",
+    "fakexrmeasy": "^1.0.9",
+    "jest-cli": "^25.1.0"
+  }
 }
