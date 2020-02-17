@@ -14,7 +14,7 @@ export class AttributeFxImpl<T> implements AttributeFx<T> {
     
     private getAttributeFromContext(attributeName): Xrm.Attributes.Attribute {
         if(!this.attributes[attributeName]) {
-            this.attributes[attributeName] = Xrm.Page.getAttribute(attributeName);
+            this.attributes[attributeName] = this.form.getAttribute(attributeName);
         }
 
         return this.attributes[attributeName];

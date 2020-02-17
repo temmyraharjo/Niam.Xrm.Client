@@ -1,5 +1,5 @@
 import { AttributeFxImpl } from '../src/lib/attribute-fx-impl';
-import { Order } from '../src/entities';
+import { Order, ORDER_METADATA } from '../src/entities';
 import { BaseTest } from '../src/tests/base-test';
 import { AttributeFx } from '../src/lib/interfaces/attribute-fx';
 
@@ -8,14 +8,12 @@ describe('AttributeFxImpl Tests', () => {
   let attributeFx: AttributeFx<Order>;
 
   beforeEach(() => {
-    baseTest = new BaseTest();
+    baseTest = new BaseTest([
+      'date', 'parentId', 'stateCode', 'orderNumber',
+      'isActive'
+    ], ORDER_METADATA);
+    
     attributeFx = new AttributeFxImpl<Order>(baseTest.context);
-
-    baseTest.xrmMock.Attribute.createDate('date');
-    baseTest.xrmMock.Attribute.createLookup('parentId', null);
-    baseTest.xrmMock.Attribute.createOptionSet('stateCode');
-    baseTest.xrmMock.Attribute.createString('orderNumber');
-    baseTest.xrmMock.Attribute.createBoolean('isActive');
   });
 
   it('AttributeFxImpl set and get', () => {
