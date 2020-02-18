@@ -9,12 +9,14 @@ export interface Order {
   isActive: boolean;
 }
 
-export const ORDER_METADATA = createEntityMetadata([
-        { attributeName: 'date', dataType: 'datetime' },
-        { attributeName: 'parentId', dataType: 'lookup' },
-        { attributeName: 'stateCode', dataType: 'optionset' },
-        { attributeName: 'amount', dataType: 'decimal' },
-        { attributeName: 'orderNumber', dataType: 'string' },
-        { attributeName: 'isActive', dataType: 'boolean' },
-    ]
-);
+export const ORDER_METADATA = createEntityMetadata({
+  entityName: 'order',
+  attributes: [
+    { attributeName: 'date', dataType: 'datetime' },
+    { attributeName: 'parentId', dataType: 'lookup' },
+    { attributeName: 'stateCode', dataType: 'optionset' },
+    { attributeName: 'amount', dataType: 'decimal' },
+    { attributeName: 'orderNumber', dataType: 'string' },
+    { attributeName: 'isActive', dataType: 'boolean' }
+  ]
+});

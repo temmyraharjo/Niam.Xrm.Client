@@ -6,7 +6,7 @@ var APP_DIR = path.resolve(__dirname, 'src');
 
 var configs = [
     {
-        entry: APP_DIR + '/lib/xrm-fx-context-impl.ts',
+        entry: APP_DIR + '/lib/xrm-fx-impl.ts',
         output: {
             path: BUILD_DIR,
             filename: 'xrm-fx.js'

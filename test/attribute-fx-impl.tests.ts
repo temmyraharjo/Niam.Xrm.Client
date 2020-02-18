@@ -4,15 +4,36 @@ import { BaseTest } from '../src/tests/base-test';
 import { AttributeFx } from '../src/lib/interfaces/attribute-fx';
 
 describe('AttributeFxImpl Tests', () => {
-  let baseTest: BaseTest;
+  let baseTest: BaseTest<Order>;
   let attributeFx: AttributeFx<Order>;
 
   beforeEach(() => {
-    baseTest = new BaseTest([
-      'date', 'parentId', 'stateCode', 'orderNumber',
-      'isActive'
-    ], ORDER_METADATA);
-    
+    baseTest = new BaseTest<Order>().init(
+      [
+        {
+          attributeName: 'date',
+          isDisabled: false
+        },
+        {
+          attributeName: 'parentId',
+          isDisabled: false
+        },
+        {
+          attributeName: 'stateCode',
+          isDisabled: false
+        },
+        {
+          attributeName: 'orderNumber',
+          isDisabled: false
+        },
+        {
+          attributeName: 'isActive',
+          isDisabled: false
+        }
+      ],
+      ORDER_METADATA
+    );
+
     attributeFx = new AttributeFxImpl<Order>(baseTest.context);
   });
 
