@@ -1,6 +1,7 @@
 import { createEntityMetadata } from './lib/data';
 
 export interface Order {
+  id: string;
   date: Date;
   parentId: Xrm.LookupValue;
   stateCode: Xrm.OptionSetValue;
@@ -11,12 +12,13 @@ export interface Order {
 
 export const ORDER_METADATA = createEntityMetadata({
   entityName: 'order',
+  odata: 'orders',
   attributes: [
-    { attributeName: 'date', dataType: 'datetime' },
-    { attributeName: 'parentId', dataType: 'lookup' },
-    { attributeName: 'stateCode', dataType: 'optionset' },
-    { attributeName: 'amount', dataType: 'decimal' },
-    { attributeName: 'orderNumber', dataType: 'string' },
-    { attributeName: 'isActive', dataType: 'boolean' }
+    { attributeName: 'date', displayName: 'date', dataType: 'datetime' },
+    { attributeName: 'parentId', displayName: 'parentId', dataType: 'lookup' },
+    { attributeName: 'stateCode', displayName: 'stateCode', dataType: 'optionset' },
+    { attributeName: 'amount', displayName: 'amount', dataType: 'decimal' },
+    { attributeName: 'orderNumber', displayName: 'orderNumber', dataType: 'string' },
+    { attributeName: 'isActive', displayName: 'isActive', dataType: 'boolean' }
   ]
 });

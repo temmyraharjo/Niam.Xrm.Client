@@ -1,16 +1,95 @@
-import { XrmMockGenerator } from 'xrm-mock';
+import { XrmMockGenerator, RetrieveMultipleRequestMock } from 'xrm-mock';
 import { XrmFxContext } from '../lib/interfaces/xrm-fx-context';
 import { XrmFxContextImpl } from '../lib/xrm-fx-context-impl';
 import { AttributeMetadata, EntityMetadata } from '../lib/data';
-import { XrmFakedContext } from 'fakexrmeasy';
+import { XrmFakedContext, Entity, IEntity } from 'fakexrmeasy';
+import IGuid from 'fakexrmeasy/dist/IGuid';
 
 export interface AttributeInForm<K> {
   attributeName: K;
   isDisabled: boolean;
 }
 
+interface ErrorResponse {
+  errorCode: number;
+  message: string;
+}
+
+interface PromiseLike<T> {
+  then<U>(
+    onFulfilled?: (value: T) => U | PromiseLike<U>,
+    onRejected?: (error: any) => U | PromiseLike<U>
+  ): PromiseLike<U>;
+
+  then<U>(
+    onFulfilled?: (value: T) => U | PromiseLike<U>,
+    onRejected?: (error: any) => void
+  ): PromiseLike<U>;
+
+  fail<U>(
+    onRejected?: (reason: ErrorResponse) => U | PromiseLike<U>
+  ): PromiseLike<U>;
+
+  always<U>(alwaysCallback: () => U | PromiseLike<U>): PromiseLike<U>;
+
+  catch<U>(
+    onRejected?: (reason: ErrorResponse) => U | PromiseLike<U>
+  ): PromiseLike<U>;
+
+  finally<U>(finallyCallback: () => U | PromiseLike<U>): PromiseLike<U>;
+}
+
+type PromiseExecutor<T> = (
+  resolve: (value: T | PromiseLike<T>) => void,
+  reject: (error: any) => void
+) => void;
+
+class XrmPromise<T> implements PromiseLike<T> {
+  private _promise: Promise<T>;
+
+  constructor(executor: PromiseExecutor<T> | Promise<T>) {
+    this._promise =
+      executor instanceof Promise ? executor : new Promise<T>(executor);
+  }
+
+  then<U>(
+    onFulfilled?: (value: T) => U | PromiseLike<U>,
+    onRejected?: (error: any) => void
+  ): PromiseLike<U>;
+  then<U>(
+    onFulfilled?: (value: T) => U | PromiseLike<U>,
+    onRejected?: (error: any) => U | PromiseLike<U>
+  ): PromiseLike<U> {
+    return new XrmPromise<U>(this._promise.then<U, U>(onFulfilled, onRejected));
+  }
+
+  fail<U>(
+    onRejected?: (reason: ErrorResponse) => U | PromiseLike<U>
+  ): PromiseLike<U> {
+    return new XrmPromise<U>(this._promise.then<U, U>(undefined, onRejected));
+  }
+
+  always<U>(alwaysCallback: () => U | PromiseLike<U>): PromiseLike<U> {
+    return new XrmPromise<U>(
+      this._promise.then<U, U>(alwaysCallback, alwaysCallback)
+    );
+  }
+
+  catch<U>(
+    onRejected?: (reason: ErrorResponse) => U | PromiseLike<U>
+  ): PromiseLike<U> {
+    return new XrmPromise<U>(this._promise.then<U, U>(undefined, onRejected));
+  }
+
+  finally<U>(finallyCallback: () => U | PromiseLike<U>): PromiseLike<U> {
+    return new XrmPromise<U>(
+      this._promise.then<U, U>(finallyCallback, finallyCallback)
+    );
+  }
+}
+
 export class FakedWebContext implements Xrm.WebApi {
-  constructor(private context: XrmFakedContext) {}
+  constructor(private webContext: XrmFakedContext) {}
 
   isAvailableOffline(entityLogicalName: string): boolean {
     throw new Error('Method not implemented.');
@@ -21,8 +100,21 @@ export class FakedWebContext implements Xrm.WebApi {
     entityLogicalName: string,
     record: any
   ): Xrm.Async.PromiseLike<Xrm.CreateResponse> {
-    //return this.context.addEntity()
-    throw new Error('Method not implemented.');
+    const entityAttribute = {};
+    var keys = Object.keys(record);
+
+    keys.forEach(key => (entityAttribute[key] = record[key]));
+
+    const entity = new Entity(entityLogicalName, '', entityAttribute);
+    const id = this.webContext.addEntity(entity);
+    const result: Xrm.CreateResponse = {
+      entityType: entityLogicalName,
+      id: id
+    };
+
+    return new XrmPromise<Xrm.CreateResponse>((resolve, reject) => {
+      resolve(result);
+    });
   }
   deleteRecord(
     entityLogicalName: string,
@@ -47,15 +139,50 @@ export class FakedWebContext implements Xrm.WebApi {
   updateRecord(
     entityLogicalName: string,
     id: string,
-    data: any
+    record: any
   ): Xrm.Async.PromiseLike<any> {
-    throw new Error('Method not implemented.');
+    const entityAttribute = {};
+    var keys = Object.keys(record);
+    keys.forEach(key => (entityAttribute[key] = record[key]));
+    const entity = new Entity(entityLogicalName, id, entityAttribute);
+    return new XrmPromise(() => this.webContext.updateEntity(entity));
+  }
+}
+
+export class FakeTestEntity implements IEntity {
+  constructor(public logicalName: string, public id: IGuid, public attributes: any = {}) {}
+
+  clone(): IEntity {
+    return null;
+  }
+  toXrmEntity() {
+    return null;
+  }
+  projectAttributes(columnSet: string[]): IEntity {
+    return null;
+  }
+  satisfiesFilter(filter: any): boolean {
+    return true;
   }
 }
 
 export class BaseTest<T> {
   private initialEntity: T;
-  public webContext = new XrmFakedContext('v9.0', 'http://localhost', true);
+
+  public xrmFakedApiContext = new XrmFakedContext(
+    'v9.0',
+    'http://localhost',
+    true
+  );
+
+  private _webContext: Xrm.WebApi;
+  public get webContext(): Xrm.WebApi {
+    if (this._webContext == null) {
+      this._webContext = new FakedWebContext(this.xrmFakedApiContext);
+    }
+
+    return this._webContext;
+  }
 
   public get xrmMock() {
     return XrmMockGenerator;
@@ -114,7 +241,7 @@ export class BaseTest<T> {
   }
 
   public get eventContext() {
-    return XrmMockGenerator.getEventContext();
+    return this.xrmMock.getEventContext();
   }
 
   private _context: XrmFxContext;
@@ -124,5 +251,9 @@ export class BaseTest<T> {
     }
 
     return this._context;
+  }
+
+  public ApiInit(entities: FakeTestEntity[]) {
+    this.xrmFakedApiContext.initialize(entities);
   }
 }
