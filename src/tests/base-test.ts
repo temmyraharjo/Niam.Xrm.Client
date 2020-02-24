@@ -1,9 +1,9 @@
-import { XrmMockGenerator, RetrieveMultipleRequestMock } from 'xrm-mock';
+import { XrmMockGenerator } from 'xrm-mock';
 import { XrmFxContext } from '../lib/interfaces/xrm-fx-context';
 import { XrmFxContextImpl } from '../lib/xrm-fx-context-impl';
 import { AttributeMetadata, EntityMetadata } from '../lib/data';
-import { XrmFakedContext, Entity, IEntity } from 'fakexrmeasy';
-import IGuid from 'fakexrmeasy/dist/IGuid';
+import { XrmFakedContext, Entity } from 'fakexrmeasy';
+import ODataParsedUrl from 'fakexrmeasy/dist/ODataParsedUrl';
 
 export interface AttributeInForm<K> {
   attributeName: K;
@@ -100,28 +100,34 @@ export class FakedWebContext implements Xrm.WebApi {
     entityLogicalName: string,
     record: any
   ): Xrm.Async.PromiseLike<Xrm.CreateResponse> {
-    const entityAttribute = {};
-    var keys = Object.keys(record);
+    const result = new XrmPromise<Xrm.CreateResponse>((resolve) => {
+      const entityAttribute = {};
+      var keys = Object.keys(record);
 
-    keys.forEach(key => (entityAttribute[key] = record[key]));
+      keys.forEach(key => (entityAttribute[key] = record[key]));
 
-    const entity = new Entity(entityLogicalName, '', entityAttribute);
-    const id = this.webContext.addEntity(entity);
-    const result: Xrm.CreateResponse = {
-      entityType: entityLogicalName,
-      id: id
-    };
-
-    return new XrmPromise<Xrm.CreateResponse>((resolve, reject) => {
+      const entity = new Entity(entityLogicalName, '', entityAttribute);
+      const id = this.webContext.addEntity(entity);
+      const result: Xrm.CreateResponse = {
+        entityType: entityLogicalName,
+        id: id
+      };
       resolve(result);
     });
+
+    return result;
   }
+
   deleteRecord(
     entityLogicalName: string,
     id: string
   ): Xrm.Async.PromiseLike<string> {
-    throw new Error('Method not implemented.');
+    this.webContext.removeEntity(entityLogicalName, id);
+    return new XrmPromise((resolve, rejects) => {
+      resolve('success');
+    });
   }
+
   retrieveRecord(
     entityLogicalName: string,
     id: string,
@@ -129,40 +135,35 @@ export class FakedWebContext implements Xrm.WebApi {
   ): Xrm.Async.PromiseLike<any> {
     throw new Error('Method not implemented.');
   }
+
   retrieveMultipleRecords(
     entityLogicalName: string,
     options?: string,
     maxPageSize?: number
   ): Xrm.Async.PromiseLike<Xrm.RetrieveMultipleResult> {
+    // const queryUrl = ODataParsedUrl.
+    // const query = this.webContext.createQuery(entityLogicalName).;
+    // query.
+
     throw new Error('Method not implemented.');
   }
+
   updateRecord(
     entityLogicalName: string,
     id: string,
     record: any
   ): Xrm.Async.PromiseLike<any> {
-    const entityAttribute = {};
-    var keys = Object.keys(record);
-    keys.forEach(key => (entityAttribute[key] = record[key]));
-    const entity = new Entity(entityLogicalName, id, entityAttribute);
-    return new XrmPromise(() => this.webContext.updateEntity(entity));
-  }
-}
+    const result = new XrmPromise((resolve) => {
+      const entityAttribute = {};
+      var keys = Object.keys(record);
+      keys.forEach(key => (entityAttribute[key] = record[key]));
 
-export class FakeTestEntity implements IEntity {
-  constructor(public logicalName: string, public id: IGuid, public attributes: any = {}) {}
+      const entity = new Entity(entityLogicalName, id, entityAttribute);
+      this.webContext.updateEntity(entity);
+      resolve('success');
+    });
 
-  clone(): IEntity {
-    return null;
-  }
-  toXrmEntity() {
-    return null;
-  }
-  projectAttributes(columnSet: string[]): IEntity {
-    return null;
-  }
-  satisfiesFilter(filter: any): boolean {
-    return true;
+    return result;
   }
 }
 
@@ -253,7 +254,7 @@ export class BaseTest<T> {
     return this._context;
   }
 
-  public ApiInit(entities: FakeTestEntity[]) {
+  public ApiInit(entities: Entity[]) {
     this.xrmFakedApiContext.initialize(entities);
   }
 }

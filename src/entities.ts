@@ -19,6 +19,7 @@ export const ORDER_METADATA = createEntityMetadata({
     { attributeName: 'stateCode', displayName: 'stateCode', dataType: 'optionset' },
     { attributeName: 'amount', displayName: 'amount', dataType: 'decimal' },
     { attributeName: 'orderNumber', displayName: 'orderNumber', dataType: 'string' },
-    { attributeName: 'isActive', displayName: 'isActive', dataType: 'boolean' }
+    { attributeName: 'isActive', displayName: 'isActive', dataType: 'boolean' },
+    { attributeName: 'id', displayName: 'id', dataType: 'string' },
   ]
 });
