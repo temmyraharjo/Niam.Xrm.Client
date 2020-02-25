@@ -90,8 +90,8 @@ describe('ApiFxImpl Tests', () => {
   it('ApiFx retrieve multiple records', () => {
     const attribute = {
       id: '1f392ac5-ace2-4143-9219-18232e558df3',
-      'statecode@OData.Community.Display.V1.FormattedValue': 'Active',
-      statecode: 0,
+      'stateCode@OData.Community.Display.V1.FormattedValue': 'Active',
+      stateCode: 0,
       '_parentId_value':'465b158c-541c-e511-80d3-3863bb347ba8',
       '_parentId_value@OData.Community.Display.V1.FormattedValue': 'PARENT CONTACT',
       '_parentId_value@Microsoft.Dynamics.CRM.lookuplogicalname': 'Account',
@@ -103,14 +103,19 @@ describe('ApiFxImpl Tests', () => {
       isActive: true,
       'isActive@OData.Community.Display.V1.FormattedValue': 'Yes'
     };
+
     baseTest.xrmFakedApiContext.initialize([
       new Entity(ORDER_METADATA.entityName,
         '1f392ac5-ace2-4143-9219-18232e558df3',
         attribute)
     ]);
 
-    apiFx.retrieveRecords(ORDER_METADATA, '?$filter=id eq 1f392ac5-ace2-4143-9219-18232e558df3').subscribe((success) => {
-      
+    apiFx.retrieveRecords(ORDER_METADATA, 
+      '?$select=id,stateCode,parentId,date,amount,orderNumber,isActive&$filter=id eq 1f392ac5-ace2-4143-9219-18232e558df3'
+      ).subscribe((entities) => {
+        const result = entities[0] as Order;
+        expect(result.id).toEqual('1f392ac5-ace2-4143-9219-18232e558df3');
+        expect(result.orderNumber).toEqual('OR-0001');
     });
   });
 });

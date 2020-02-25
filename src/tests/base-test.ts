@@ -2,8 +2,8 @@ import { XrmMockGenerator } from 'xrm-mock';
 import { XrmFxContext } from '../lib/interfaces/xrm-fx-context';
 import { XrmFxContextImpl } from '../lib/xrm-fx-context-impl';
 import { AttributeMetadata, EntityMetadata } from '../lib/data';
-import { XrmFakedContext, Entity } from 'fakexrmeasy';
-import ODataParsedUrl from 'fakexrmeasy/dist/ODataParsedUrl';
+import { XrmFakedContext, Entity, IEntity } from 'fakexrmeasy';
+import * as Enumerable from 'linq';
 
 export interface AttributeInForm<K> {
   attributeName: K;
@@ -89,7 +89,7 @@ class XrmPromise<T> implements PromiseLike<T> {
 }
 
 export class FakedWebContext implements Xrm.WebApi {
-  constructor(private webContext: XrmFakedContext) {}
+  constructor(private webContext: XrmFakedContexClient) {}
 
   isAvailableOffline(entityLogicalName: string): boolean {
     throw new Error('Method not implemented.');
@@ -100,7 +100,7 @@ export class FakedWebContext implements Xrm.WebApi {
     entityLogicalName: string,
     record: any
   ): Xrm.Async.PromiseLike<Xrm.CreateResponse> {
-    const result = new XrmPromise<Xrm.CreateResponse>((resolve) => {
+    const result = new XrmPromise<Xrm.CreateResponse>(resolve => {
       const entityAttribute = {};
       var keys = Object.keys(record);
 
@@ -122,8 +122,8 @@ export class FakedWebContext implements Xrm.WebApi {
     entityLogicalName: string,
     id: string
   ): Xrm.Async.PromiseLike<string> {
-    this.webContext.removeEntity(entityLogicalName, id);
     return new XrmPromise((resolve, rejects) => {
+      this.webContext.removeEntity(entityLogicalName, id);
       resolve('success');
     });
   }
@@ -141,11 +141,18 @@ export class FakedWebContext implements Xrm.WebApi {
     options?: string,
     maxPageSize?: number
   ): Xrm.Async.PromiseLike<Xrm.RetrieveMultipleResult> {
-    // const queryUrl = ODataParsedUrl.
-    // const query = this.webContext.createQuery(entityLogicalName).;
-    // query.
-
-    throw new Error('Method not implemented.');
+    const result = this.webContext.retrieveMultipleRecords(
+      entityLogicalName,
+      options,
+      maxPageSize
+    );
+    const multipleResult: Xrm.RetrieveMultipleResult = {
+      entities: result,
+      nextLink: ''
+    };
+    return new XrmPromise(resolve => {
+      resolve(multipleResult);
+    });
   }
 
   updateRecord(
@@ -153,7 +160,7 @@ export class FakedWebContext implements Xrm.WebApi {
     id: string,
     record: any
   ): Xrm.Async.PromiseLike<any> {
-    const result = new XrmPromise((resolve) => {
+    const result = new XrmPromise(resolve => {
       const entityAttribute = {};
       var keys = Object.keys(record);
       keys.forEach(key => (entityAttribute[key] = record[key]));
@@ -167,10 +174,105 @@ export class FakedWebContext implements Xrm.WebApi {
   }
 }
 
+export class XrmFakedContexClient extends XrmFakedContext {
+  getDictionary(param?: string) {
+    const queryData = (param || '').split('&');
+    const dictionary = {};
+
+    for (const word of queryData) {
+      if (word.indexOf('=') == -1) continue;
+      const splitParam = word.split('=');
+      dictionary[splitParam[0]] = splitParam[1];
+    }
+
+    return dictionary;
+  }
+
+  getRecords(entityName: string, options?: string) {
+    const data = this.getAllData();
+    const paramDictionary = this.getDictionary(options);
+
+    if (!data.containsKey(entityName)) return [];
+
+    var entityDictionary = data.get(entityName);
+    var records = entityDictionary.values();
+
+    //from
+    //join / expands
+    //where clause
+    //projection
+    //orderby
+
+    var columnSet =
+      paramDictionary['select'] != null ? paramDictionary['select'] : null;
+    var filter =
+      paramDictionary['filter'] != null ? paramDictionary['filter'] : null;
+    var topCount =
+      paramDictionary['top'] != null ? paramDictionary['top'] : null;
+
+    var queryeable = Enumerable.from(records)
+      //.join()
+      .where((e, index) => {
+        return paramDictionary['id'] && paramDictionary['id'] !== ''
+          ? paramDictionary['id'] == e.id.toString()
+          : true;
+      }) //Single id filter if retrieving single record
+      .where((e, index) => {
+        return e.satisfiesFilter(filter);
+      })
+      .select((e, index) => {
+        return e.projectAttributes(columnSet);
+      });
+    //orderby
+
+    if (topCount) {
+      queryeable = queryeable.take(topCount);
+    }
+
+    var arrayResult = queryeable.toArray();
+
+    var result: Array<IEntity> = [];
+    for (var i = 0; i < arrayResult.length; i++) {
+      result.push(arrayResult[i]);
+    }
+
+    return result;
+  }
+
+  retrieveMultipleRecords(
+    entityName: string,
+    options?: string,
+    maxPageSize?: number
+  ) {
+    const data = this.getRecords(entityName, options);
+
+    var entities = [];
+    for (var i = 0; i < data.length; i++) {
+      var odataEntity = data[i].toXrmEntity();
+      odataEntity['@odata.etag'] = 'W/"' + i.toString() + '"';
+      entities.push(odataEntity);
+    }
+
+    return entities;
+  }
+
+  protected getPluralSetName(entityName: string): string {
+    var ending = entityName.slice(-1);
+
+    if (ending == 'y')
+      return entityName.substring(0, entityName.length - 1) + 'ies';
+
+    if (ending == 's')
+      return entityName.substring(0, entityName.length - 1) + 'es';
+
+    return entityName + 's';
+  }
+}
+
 export class BaseTest<T> {
   private initialEntity: T;
 
-  public xrmFakedApiContext = new XrmFakedContext(
+  public xrmFakedApiContext = new XrmFakedContexClient(
     'v9.0',
     'http://localhost',
     true
