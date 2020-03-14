@@ -47,6 +47,7 @@
     "@types/xrm": "^9.0.20",
     "awesome-typescript-loader": "^5.2.1",
     "fakexrmeasy": "^1.0.9",
-    "jest-cli": "^25.1.0"
+    "jest-cli": "^25.1.0",
+    "rxjs": "^6.5.4"
   }
 }
