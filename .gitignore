@@ -5,3 +5,4 @@ dist/bundle.js.map
 .idea/tasks.xml
 .idea/usage.statistics.xml
 .idea/shelf
+dist/
