@@ -1,23 +1,31 @@
-import typescript from 'rollup-plugin-typescript2'
-import pkg from './package.json';
+import typescript from '@rollup/plugin-typescript';
+import { terser } from 'rollup-plugin-terser';
 
-export default {
-  input: {
-    employee: 'src/employee/index.ts'
-  },
-  output: {
-    dir: 'dist',
-    format: 'umd',
-    globals: {
-      '@niam/xrm-client': 'niam.xrm'
+export default commandLineArgs => {
+  let plugins = commandLineArgs.prod === true
+    ? [
+      typescript({ module: 'es2015' }),
+      terser()
+    ]
+    : [
+      typescript({ module: 'es2015' })
+    ]
+  
+  return {
+    input: {
+      'my.company.employee': 'src/employee/main.ts'
     },
-    name: 'My.Company'
-  },
-  external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ],
-  plugins: [
-    typescript() 
-  ]
+    output: {
+      dir: 'dist',
+      format: 'umd',
+      globals: {
+        '@niam/xrm-client': 'niam.xrm'
+      },
+      name: 'My.Company'
+    },
+    external: [
+      '@niam/xrm-client'
+    ],
+    plugins
+  };
 }
