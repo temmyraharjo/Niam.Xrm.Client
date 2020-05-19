@@ -6,3 +6,5 @@ dist/bundle.js.map
 .idea/usage.statistics.xml
 .idea/shelf
 dist/
+.vs/**/*
+.vscode/**/*
