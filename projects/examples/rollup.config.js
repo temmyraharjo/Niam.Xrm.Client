@@ -19,7 +19,7 @@ export default commandLineArgs => {
       dir: 'dist',
       format: 'umd',
       globals: {
-        '@niam/xrm-client': 'niam.xrm'
+        '@niam/xrm-client': 'Niam.Xrm'
       },
       name: 'My.Company'
     },

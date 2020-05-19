@@ -16,7 +16,7 @@ export default commandLineArgs => {
     output: {
       dir: 'dist',
       format: 'umd',
-      name: 'niam.xrm'
+      name: 'Niam.Xrm'
     },
     plugins
   };
