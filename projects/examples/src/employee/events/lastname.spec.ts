@@ -3,9 +3,9 @@ import 'mocha';
 import { XrmMockGenerator, EventContextMock } from 'xrm-mock';
 import { Fx } from '@niam/xrm-client';
 import { Employee } from '../../entities';
-import * as firstname from './firstname';
+import * as lastname from './lastname';
 
-describe('events/firstname', () => {
+describe('events/lastname', () => {
   let context: EventContextMock;
   let fx: Fx<Employee>;
 
@@ -20,7 +20,7 @@ describe('events/firstname', () => {
   });
 
   it('set fullname on change', () => {
-    firstname.changed(context);
+    lastname.changed(context);
     expect(fx.get('new_fullname')).to.equal('FirstName LastName');
   });
 });

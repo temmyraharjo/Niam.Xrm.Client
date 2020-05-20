@@ -5,8 +5,12 @@ import { XrmMockGenerator } from 'xrm-mock';
 
 // https://github.com/microsoft/TypeScript/issues/32263
 export type TestEntity = {
-  name: string;
-  age: number;
+  name?: string;
+  age?: number;
+  date?: Date;
+  bool?: boolean;
+  lookupid?: Xrm.LookupValue[];
+  options?: number;
 }
 
 describe('Fx', () => {
@@ -15,8 +19,13 @@ describe('Fx', () => {
 
   beforeEach(() => {
     XrmMockGenerator.initialise();
-    XrmMockGenerator.Attribute.createString('name', 'NAME-001');
-    XrmMockGenerator.Attribute.createNumber('age', 15);
+    const attr = XrmMockGenerator.Attribute;
+    attr.createString('name', 'NAME-001');
+    attr.createNumber('age', 15);
+    attr.createDate('date', new Date(2020, 1, 2));
+    attr.createBoolean('bool', true);
+    attr.createLookup('lookupid', [{ id: 'my-id', name: 'LookupName', entityType: '1234' }]);
+    attr.createOptionSet('options', 2);
 
     context = XrmMockGenerator.getEventContext();
     fx = new Fx<TestEntity>(context);
@@ -28,43 +37,50 @@ describe('Fx', () => {
 
   describe('early-bound', () => {
     it('can get attribute value', () => {
-      expect(fx.get('age')).to.equal(15);
-      expect(fx.get('name')).to.equal('NAME-001');
+      const age: number = fx.get('age');
+      const name: string = fx.get('name');
+      const date: Date = fx.get('date');
+      const bool: boolean = fx.get('bool');
+      const lookupid: Xrm.LookupValue[] = fx.get('lookupid');
+      const options: number = fx.get('options');
+
+      expect(age).to.equal(15);
+      expect(name).to.equal('NAME-001');
+      expect(date).to.deep.equal(new Date(2020, 1, 2));
+      expect(bool).to.equal(true);
+      expect(lookupid).to.deep.equal([{ id: 'my-id', name: 'LookupName', entityType: '1234' }]);
+      expect(options).to.equal(2);
     });
 
     it('can set attribute value', () => {
-      fx.set('age', 10)
-      expect(fx.get('age')).to.equal(10);
+      fx.set('age', 10);
+      const age: number = fx.get('age');
+      expect(age).to.equal(10);
 
       fx.set('name', 'NAME-002');
-      expect(fx.get('name')).to.equal('NAME-002');
+      const name: string = fx.get('name');
+      expect(name).to.equal('NAME-002');
     });
   });
 
   describe('late-bound', () => {
-    let context: Xrm.Events.EventContext;
     let fx: Fx;
 
     beforeEach(() => {
-      XrmMockGenerator.initialise();
-      XrmMockGenerator.Attribute.createString('name', 'NAME-001');
-      XrmMockGenerator.Attribute.createNumber('age', 15);
-
-      context = XrmMockGenerator.getEventContext();
       fx = new Fx(context);
     });
 
     it('can get attribute value', () => {
-      expect(fx.get('name')).to.equal('NAME-001');
-      expect(fx.get('age')).to.equal(15);
+      expect(fx.get<string>('name')).to.equal('NAME-001');
+      expect(fx.get<number>('age')).to.equal(15);
     });
 
     it('can set attribute value', () => {
       fx.set('name', 'NAME-003');
-      expect(fx.get('name')).to.equal('NAME-003');
+      expect(fx.get<string>('name')).to.equal('NAME-003');
 
       fx.set('age', 99);
-      expect(fx.get('age')).to.equal(99);
+      expect(fx.get<number>('age')).to.equal(99);
     });
   });
 });

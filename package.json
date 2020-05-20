@@ -12,7 +12,7 @@
     "projects/examples"
   ],
   "scripts": {
-    "@niam/xrm-client": "yarn workspace @niam/xrm-client",
+    "fx": "yarn workspace @niam/xrm-client",
     "examples": "yarn workspace examples"
   }
 }
