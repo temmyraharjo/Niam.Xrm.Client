@@ -27,6 +27,9 @@ describe('Fx', () => {
     attr.createLookup('lookupid', [{ id: 'my-id', name: 'LookupName', entityType: '1234' }]);
     attr.createOptionSet('options', 2);
 
+    const ctrl = XrmMockGenerator.Control;
+    ctrl.createGrid('gridctrl');
+
     context = XrmMockGenerator.getEventContext();
     fx = new Fx<TestEntity>(context);
   });
@@ -61,6 +64,14 @@ describe('Fx', () => {
       const name: string = fx.get('name');
       expect(name).to.equal('NAME-002');
     });
+
+    it('can get control', () => {
+      expect(fx.ctrl('name')).to.not.null;
+      expect(fx.ctrl('lookupid')).to.not.null;
+      expect(fx.ctrl('age')).to.not.null;
+      expect(fx.ctrl('bool')).to.not.null;
+      expect(fx.ctrl('options')).to.not.null;
+    });
   });
 
   describe('late-bound', () => {
@@ -81,6 +92,15 @@ describe('Fx', () => {
 
       fx.set('age', 99);
       expect(fx.get<number>('age')).to.equal(99);
+    });
+
+    it('can get control', () => {
+      expect(fx.ctrl<Xrm.Controls.NumberControl>('name')).to.not.null;
+      expect(fx.ctrl<Xrm.Controls.LookupControl>('lookupid')).to.not.null;
+      expect(fx.ctrl<Xrm.Controls.NumberControl>('age')).to.not.null;
+      expect(fx.ctrl<Xrm.Controls.StandardControl>('bool')).to.not.null;
+      expect(fx.ctrl<Xrm.Controls.OptionSetControl>('options')).to.not.null;
+      expect(fx.ctrl<Xrm.Controls.GridControl>('gridctrl')).to.not.null;
     });
   });
 });

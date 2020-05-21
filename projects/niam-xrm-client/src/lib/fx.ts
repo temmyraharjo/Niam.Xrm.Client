@@ -1,4 +1,5 @@
 import { Entity, AttributeOf } from './definitions/index';
+import { XrmAttributeControl } from './definitions/control';
 
 export type AttributeType<TV> =
   TV extends string ? Xrm.Attributes.StringAttribute :
@@ -9,14 +10,6 @@ export type AttributeType<TV> =
   Xrm.Attributes.Attribute;
 
 export type OptionSetAttribute = Xrm.Attributes.OptionSetAttribute;
-
-export type ControlType<TV> =
-  TV extends string ? Xrm.Controls.StringControl :
-  TV extends number ? Xrm.Controls.NumberControl :
-  TV extends boolean ? Xrm.Controls.StandardControl :
-  TV extends Date ? Xrm.Controls.DateControl :
-  TV extends Xrm.LookupValue[] ? Xrm.Controls.LookupControl :
-  Xrm.Controls.StandardControl;
 
 export class Fx<TE extends Entity = Entity> {
   constructor(public readonly context: Xrm.Events.EventContext) {
@@ -37,7 +30,20 @@ export class Fx<TE extends Entity = Entity> {
     return this.formContext.getAttribute(name);
   }
 
-  ctrl<Attribute extends AttributeOf<TE>>(name: Attribute): ControlType<TE[Attribute]> {
+  ctrl<T extends Xrm.Controls.StringControl>(name: AttributeOf<TE>): Xrm.Controls.StringControl
+  ctrl<T extends Xrm.Controls.NumberControl>(name: AttributeOf<TE>): Xrm.Controls.NumberControl
+  ctrl<T extends Xrm.Controls.StandardControl>(name: AttributeOf<TE>): Xrm.Controls.StandardControl
+  ctrl<T extends Xrm.Controls.DateControl>(name: AttributeOf<TE>): Xrm.Controls.DateControl
+  ctrl<T extends Xrm.Controls.LookupControl>(name: AttributeOf<TE>): Xrm.Controls.LookupControl
+  ctrl<T extends Xrm.Controls.IframeControl>(name: AttributeOf<TE>): Xrm.Controls.IframeControl
+  ctrl<T extends Xrm.Controls.GridControl>(name: AttributeOf<TE>): Xrm.Controls.GridControl
+  ctrl<T extends Xrm.Controls.FramedControl>(name: AttributeOf<TE>): Xrm.Controls.FramedControl
+  ctrl<T extends Xrm.Controls.QuickFormControl>(name: AttributeOf<TE>): Xrm.Controls.QuickFormControl
+  ctrl<T extends Xrm.Controls.OptionSetControl>(name: AttributeOf<TE>): Xrm.Controls.OptionSetControl
+  ctrl<T extends Xrm.Controls.AutoLookupControl>(name: AttributeOf<TE>): Xrm.Controls.AutoLookupControl
+  ctrl<T extends Xrm.Controls.SilverlightControl>(name: AttributeOf<TE>): Xrm.Controls.SilverlightControl
+  ctrl<Attribute extends AttributeOf<TE>>(name: Attribute): XrmAttributeControl<TE[Attribute]>
+  ctrl(name: string): Xrm.Controls.Control {
     return this.formContext.getControl(name);
   }
 
