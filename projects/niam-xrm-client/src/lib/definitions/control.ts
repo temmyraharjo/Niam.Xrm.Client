@@ -1,8 +1,14 @@
-export type XrmAttributeControl<TV> =
-    TV extends string ? Xrm.Controls.StringControl :
-    TV extends number ? Xrm.Controls.NumberControl :
-    TV extends boolean ? Xrm.Controls.StandardControl :
-    TV extends Date ? Xrm.Controls.DateControl :
-    TV extends Xrm.LookupValue[] ? Xrm.Controls.LookupControl :
-    TV extends Xrm.OptionSetValue ? Xrm.Controls.OptionSetControl :
-    Xrm.Controls.StandardControl;
+import { EntityAttributeValue } from './entity';
+
+export type XrmAttributeControl<TValue extends EntityAttributeValue> =
+  TValue extends string ? Xrm.Controls.StringControl :
+  TValue extends number ? Xrm.Controls.NumberControl :
+  TValue extends boolean ? Xrm.Controls.StandardControl :
+  TValue extends Date ? Xrm.Controls.DateControl :
+  TValue extends Xrm.LookupValue[] ? Xrm.Controls.LookupControl :
+  Xrm.Controls.StandardControl;
+
+export type XrmFormRelatedControl<TV> =
+  TV extends Xrm.Controls.GridControl ? Xrm.Controls.GridControl :
+  TV extends Xrm.Controls.IframeControl ? Xrm.Controls.IframeControl :
+  Xrm.Controls.Control;

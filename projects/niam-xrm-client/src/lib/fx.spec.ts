@@ -13,9 +13,13 @@ export type TestEntity = {
   options?: number;
 }
 
+export type TestEntityForm = {
+  grid?: Xrm.Controls.GridControl;
+}
+
 describe('Fx', () => {
   let context: Xrm.Events.EventContext;
-  let fx: Fx<TestEntity>;
+  let fx: Fx<TestEntity, TestEntityForm>;
 
   beforeEach(() => {
     XrmMockGenerator.initialise();
@@ -28,10 +32,10 @@ describe('Fx', () => {
     attr.createOptionSet('options', 2);
 
     const ctrl = XrmMockGenerator.Control;
-    ctrl.createGrid('gridctrl');
+    ctrl.createGrid('grid');
 
     context = XrmMockGenerator.getEventContext();
-    fx = new Fx<TestEntity>(context);
+    fx = new Fx<TestEntity, TestEntityForm>(context);
   });
 
   it('can create Fx object', () => {
@@ -65,12 +69,37 @@ describe('Fx', () => {
       expect(name).to.equal('NAME-002');
     });
 
-    it('can get control', () => {
-      expect(fx.ctrl('name')).to.not.null;
-      expect(fx.ctrl('lookupid')).to.not.null;
-      expect(fx.ctrl('age')).to.not.null;
-      expect(fx.ctrl('bool')).to.not.null;
-      expect(fx.ctrl('options')).to.not.null;
+    it('can get attribute', () => {
+      const nameAttribute: Xrm.Attributes.StringAttribute = fx.attr('name');
+      const ageAttribute: Xrm.Attributes.NumberAttribute = fx.attr('age');
+      const boolAttribute: Xrm.Attributes.BooleanAttribute = fx.attr('bool');
+      const optionsAttribute: Xrm.Attributes.OptionSetAttribute = fx.attr<Xrm.Attributes.OptionSetAttribute>('options');
+      const dateAttribute: Xrm.Attributes.DateAttribute = fx.attr('date');
+
+      expect(nameAttribute).is.not.null;
+      expect(ageAttribute).is.not.null;
+      expect(boolAttribute).is.not.null;
+      expect(optionsAttribute).is.not.null;
+      expect(dateAttribute).is.not.null;
+    });
+
+    it('can get attribute control', () => {
+      const nameControl: Xrm.Controls.StringControl = fx.ctrl('name');
+      const ageControl: Xrm.Controls.NumberControl = fx.ctrl('age');
+      const boolControl: Xrm.Controls.StandardControl = fx.ctrl('bool');
+      const optionsControl: Xrm.Controls.OptionSetControl = fx.ctrl<Xrm.Controls.OptionSetControl>('options');
+      const dateControl: Xrm.Controls.DateControl = fx.ctrl('date');
+
+      expect(nameControl).is.not.null;
+      expect(ageControl).is.not.null;
+      expect(boolControl).is.not.null;
+      expect(optionsControl).is.not.null;
+      expect(dateControl).is.not.null;
+    });
+
+    it('can get form control', () => {
+      const gridControl: Xrm.Controls.GridControl = fx.ctrl('grid');
+      expect(gridControl).is.not.null;
     });
   });
 
@@ -95,12 +124,12 @@ describe('Fx', () => {
     });
 
     it('can get control', () => {
-      expect(fx.ctrl<Xrm.Controls.NumberControl>('name')).to.not.null;
-      expect(fx.ctrl<Xrm.Controls.LookupControl>('lookupid')).to.not.null;
-      expect(fx.ctrl<Xrm.Controls.NumberControl>('age')).to.not.null;
-      expect(fx.ctrl<Xrm.Controls.StandardControl>('bool')).to.not.null;
-      expect(fx.ctrl<Xrm.Controls.OptionSetControl>('options')).to.not.null;
-      expect(fx.ctrl<Xrm.Controls.GridControl>('gridctrl')).to.not.null;
+      expect(fx.ctrl<Xrm.Controls.NumberControl>('name')).is.not.null;
+      expect(fx.ctrl<Xrm.Controls.LookupControl>('lookupid')).is.not.null;
+      expect(fx.ctrl<Xrm.Controls.NumberControl>('age')).is.not.null;
+      expect(fx.ctrl<Xrm.Controls.StandardControl>('bool')).is.not.null;
+      expect(fx.ctrl<Xrm.Controls.OptionSetControl>('options')).is.not.null;
+      expect(fx.ctrl<Xrm.Controls.GridControl>('grid')).is.not.null;
     });
   });
 });

@@ -17,13 +17,11 @@
     "chai": "^4.2.0",
     "mocha": "^7.1.2",
     "rollup": "^2.10.2",
+    "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-terser": "^5.3.0",
     "ts-node": "^8.10.1",
     "tslib": "^2.0.0",
     "typescript": "^3.8.3",
     "xrm-mock": "^3.4.18"
-  },
-  "dependencies": {
-    "rollup-plugin-copy": "^3.3.0"
   }
 }
