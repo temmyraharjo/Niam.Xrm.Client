@@ -1,4 +1,4 @@
-export type Employee = {
+export type new_employee = {
   new_firstname: string;
   new_lastname: string;
   new_fullname: string;
@@ -7,7 +7,7 @@ export type Employee = {
   new_divisionid: Xrm.LookupValue[];
 }
 
-export const Employee = Object.freeze({
+export const new_employee = Object.freeze({
   options: {
     new_level: {
       consultant: 1,

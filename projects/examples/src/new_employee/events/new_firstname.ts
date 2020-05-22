@@ -1,7 +1,7 @@
 import { createHandler } from '@niam/xrm-client';
-import { Employee } from '../../entities';
+import { new_employee } from '../../entities';
 import * as new_fullname from './new_fullname';
 
-export const changed = createHandler<Employee>(fx => {
+export const changed = createHandler<new_employee>(fx => {
   new_fullname.setFromNameConcatenation(fx);
 });

@@ -13,7 +13,7 @@ export default commandLineArgs => {
   
   return {
     input: {
-      'my.company.employee': 'src/employee/main.ts'
+      'my.company.new_employee': 'src/new_employee/main.ts'
     },
     output: {
       dir: 'dist',

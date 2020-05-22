@@ -2,12 +2,12 @@ import { expect } from 'chai';
 import 'mocha';
 import { XrmMockGenerator, EventContextMock } from 'xrm-mock';
 import { Fx } from '@niam/xrm-client';
-import { Employee } from '../../entities';
+import { new_employee } from '../../entities';
 import * as new_level from './new_level';
 
 describe('events/new_level', () => {
   let context: EventContextMock;
-  let fx: Fx<Employee>;
+  let fx: Fx<new_employee>;
 
   before(() => {
     XrmMockGenerator.initialise();
@@ -21,7 +21,7 @@ describe('events/new_level', () => {
     attr.createLookup('new_divisionid', null);
 
     context = XrmMockGenerator.getEventContext();
-    fx = new Fx<Employee>(context);
+    fx = new Fx<new_employee>(context);
   });
 
   describe('when set to null', () => {
@@ -41,7 +41,9 @@ describe('events/new_level', () => {
 
     it('can not change new_superiorid and new_divisionid', () => {
       expect(fx.ctrl('new_superiorid').getDisabled()).is.true;
+      expect(fx.attr('new_superiorid').getRequiredLevel()).to.equal('none');
       expect(fx.ctrl('new_divisionid').getDisabled()).is.true;
+      expect(fx.attr('new_divisionid').getRequiredLevel()).to.equal('none');
     });
   });
 
@@ -51,7 +53,7 @@ describe('events/new_level', () => {
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
       fx.ctrl('new_superiorid').setDisabled(true);
       fx.ctrl('new_divisionid').setDisabled(false);
-      fx.set('new_level', Employee.options.new_level.consultant);
+      fx.set('new_level', new_employee.options.new_level.consultant);
       new_level.changed(context);
     });
 
@@ -60,12 +62,14 @@ describe('events/new_level', () => {
       expect(fx.get('new_divisionid')).is.null;
     });
 
-    it('can change new_superiorid', () => {
+    it('must set new_superiorid', () => {
       expect(fx.ctrl('new_superiorid').getDisabled()).is.false;
+      expect(fx.attr('new_superiorid').getRequiredLevel()).to.equal('required');
     });
 
     it('can not change new_divisionid', () => {
       expect(fx.ctrl('new_divisionid').getDisabled()).is.true;
+      expect(fx.attr('new_divisionid').getRequiredLevel()).to.equal('none');
     });
   });
 
@@ -75,7 +79,7 @@ describe('events/new_level', () => {
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
       fx.ctrl('new_superiorid').setDisabled(true);
       fx.ctrl('new_divisionid').setDisabled(false);
-      fx.set('new_level', Employee.options.new_level.supervisor);
+      fx.set('new_level', new_employee.options.new_level.supervisor);
       new_level.changed(context);
     });
 
@@ -84,12 +88,14 @@ describe('events/new_level', () => {
       expect(fx.get('new_divisionid')).is.null;
     });
 
-    it('can change new_superiorid', () => {
+    it('must set new_superiorid', () => {
       expect(fx.ctrl('new_superiorid').getDisabled()).is.false;
+      expect(fx.attr('new_superiorid').getRequiredLevel()).to.equal('required');
     });
 
     it('can not change new_divisionid', () => {
       expect(fx.ctrl('new_divisionid').getDisabled()).is.true;
+      expect(fx.attr('new_divisionid').getRequiredLevel()).to.equal('none');
     });
   });
 
@@ -99,7 +105,7 @@ describe('events/new_level', () => {
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
       fx.ctrl('new_superiorid').setDisabled(false);
       fx.ctrl('new_divisionid').setDisabled(true);
-      fx.set('new_level', Employee.options.new_level.manager);
+      fx.set('new_level', new_employee.options.new_level.manager);
       new_level.changed(context);
     });
 
@@ -110,10 +116,12 @@ describe('events/new_level', () => {
 
     it('can not change new_superiorid', () => {
       expect(fx.ctrl('new_superiorid').getDisabled()).is.true;
+      expect(fx.attr('new_superiorid').getRequiredLevel()).to.equal('none');
     });
 
-    it('can change new_divisionid', () => {
+    it('must set new_divisionid', () => {
       expect(fx.ctrl('new_divisionid').getDisabled()).is.false;
+      expect(fx.attr('new_divisionid').getRequiredLevel()).to.equal('required');
     });
   });
 });

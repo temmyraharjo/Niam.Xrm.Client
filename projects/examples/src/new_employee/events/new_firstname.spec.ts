@@ -2,12 +2,12 @@ import { expect } from 'chai';
 import 'mocha';
 import { XrmMockGenerator, EventContextMock } from 'xrm-mock';
 import { Fx } from '@niam/xrm-client';
-import { Employee } from '../../entities';
+import { new_employee } from '../../entities';
 import * as new_firstname from './new_firstname';
 
 describe('events/new_firstname', () => {
   let context: EventContextMock;
-  let fx: Fx<Employee>;
+  let fx: Fx<new_employee>;
 
   before(() => {
     XrmMockGenerator.initialise();
@@ -16,7 +16,7 @@ describe('events/new_firstname', () => {
     attr.createString('new_lastname');
     attr.createString('new_fullname');
     context = XrmMockGenerator.getEventContext();
-    fx = new Fx<Employee>(context);
+    fx = new Fx<new_employee>(context);
   });
 
   describe('when set to any', () => {
