@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 import 'mocha';
-import { XrmMockGenerator, EventContextMock } from 'xrm-mock';
+import {
+  XrmMockGenerator,
+  EventContextMock,
+  LookupControlMock
+} from 'xrm-mock';
 import { Fx } from '@niam/xrm-client';
 import { new_employee } from '../../entities';
 import * as new_level from './new_level';
@@ -9,7 +13,7 @@ describe('events/new_level', () => {
   let context: EventContextMock;
   let fx: Fx<new_employee>;
 
-  before(() => {
+  beforeEach(() => {
     XrmMockGenerator.initialise();
     const attr = XrmMockGenerator.Attribute;
     attr.createOptionSet('new_level', null, [
@@ -25,8 +29,8 @@ describe('events/new_level', () => {
   });
 
   describe('when set to null', () => {
-    before(() => {
-      fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_superior' }]);
+    beforeEach(() => {
+      fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_employee' }]);
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
       fx.ctrl('new_superiorid').setDisabled(false);
       fx.ctrl('new_divisionid').setDisabled(false);
@@ -48,7 +52,7 @@ describe('events/new_level', () => {
   });
 
   describe('when set to new_level.consultant', () => {
-    before(() => {
+    beforeEach(() => {
       fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_superior' }]);
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
       fx.ctrl('new_superiorid').setDisabled(true);
@@ -74,8 +78,8 @@ describe('events/new_level', () => {
   });
 
   describe('when set to new_level.supervisor', () => {
-    before(() => {
-      fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_superior' }]);
+    beforeEach(() => {
+      fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_employee' }]);
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
       fx.ctrl('new_superiorid').setDisabled(true);
       fx.ctrl('new_divisionid').setDisabled(false);
@@ -100,8 +104,8 @@ describe('events/new_level', () => {
   });
 
   describe('when set to new_level.manager', () => {
-    before(() => {
-      fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_superior' }]);
+    beforeEach(() => {
+      fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_employee' }]);
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
       fx.ctrl('new_superiorid').setDisabled(false);
       fx.ctrl('new_divisionid').setDisabled(true);

@@ -27,7 +27,7 @@ User story - Employee:
      a. superiorid is mandatory, filter employee.level = Supervisor
      b. divisionid is readonly
    - Supervisor
-     a. superiorid is mandatory, filter employee.level = Supervisor
+     a. superiorid is mandatory, filter employee.level = Manager
      b. divisionid is readonly
    - Manager
      a. superiorid is not-mandatory, disabled, value: null

@@ -9,7 +9,7 @@ describe('events/new_firstname', () => {
   let context: EventContextMock;
   let fx: Fx<new_employee>;
 
-  before(() => {
+  beforeEach(() => {
     XrmMockGenerator.initialise();
     const attr = XrmMockGenerator.Attribute;
     attr.createString('new_firstname');
@@ -20,7 +20,7 @@ describe('events/new_firstname', () => {
   });
 
   describe('when set to any', () => {
-    before(() => {
+    beforeEach(() => {
       fx.set('new_firstname', 'FirstName');
       fx.set('new_lastname', 'LastName');
     })
