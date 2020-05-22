@@ -39,7 +39,6 @@ export class Fx<TEntity extends Entity = Entity, TForm extends EntityForm = Enti
     return this.attr(name).getValue() as TValue;
   }
 
-  set<TValue extends TEntity[KeyOf<TEntity>]>(name: KeyOf<TEntity>, value: TValue): void
   set<Attribute extends KeyOf<TEntity>, TValue extends TEntity[Attribute]>(name: Attribute, value: TValue): void
   set(name: KeyOf<TEntity>, value: TEntity[KeyOf<TEntity>]) {
     this.attr<Xrm.Attributes.Attribute>(name).setValue(value);

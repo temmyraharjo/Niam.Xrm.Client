@@ -3,13 +3,13 @@ import 'mocha';
 import { XrmMockGenerator, EventContextMock } from 'xrm-mock';
 import { Fx } from '@niam/xrm-client';
 import { Employee } from '../../entities';
-import * as firstname from './firstname';
+import * as new_lastname from './new_lastname';
 
-describe('events/firstname', () => {
+describe('events/new_lastname', () => {
   let context: EventContextMock;
   let fx: Fx<Employee>;
 
-  beforeEach(() => {
+  before(() => {
     XrmMockGenerator.initialise();
     const attr = XrmMockGenerator.Attribute;
     attr.createString('new_firstname', 'FirstName');
@@ -19,8 +19,15 @@ describe('events/firstname', () => {
     fx = new Fx<Employee>(context);
   });
 
-  it('set fullname on change', () => {
-    firstname.changed(context);
-    expect(fx.get('new_fullname')).to.equal('FirstName LastName');
+  describe('when set to any', () => {
+    before(() => {
+      fx.set('new_firstname', 'FirstName');
+      fx.set('new_lastname', 'LastName');
+    })
+
+    it('set fullname', () => {
+      new_lastname.changed(context);
+      expect(fx.get('new_fullname')).to.equal('FirstName LastName');
+    });
   });
 });

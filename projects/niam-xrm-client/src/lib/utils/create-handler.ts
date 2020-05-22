@@ -1,9 +1,10 @@
-import { Entity } from '../definitions';
+import { Entity, EntityForm } from '../definitions';
 import { Fx } from '../fx';
 
-export function createHandler<TE extends Entity = Entity>(handler: (fx: Fx<TE>) => void): (context: Xrm.Events.EventContext) => void {
-  return context => {
-    const fx = new Fx<TE>(context);
-    handler(fx!);
-  };
+export function createHandler<TEntity extends Entity = Entity, TForm extends EntityForm = EntityForm>(handler: (fx: Fx<TEntity, TForm>) => void):
+  (context: Xrm.Events.EventContext) => void {
+    return context => {
+      const fx = new Fx<TEntity, TForm>(context);
+      handler(fx!);
+    };
 }
