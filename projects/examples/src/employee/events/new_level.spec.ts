@@ -69,7 +69,7 @@ describe('events/new_level', () => {
     });
   });
 
-  describe('when set to level.supervisor', () => {
+  describe('when set to new_level.supervisor', () => {
     before(() => {
       fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_superior' }]);
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
@@ -93,7 +93,7 @@ describe('events/new_level', () => {
     });
   });
 
-  describe('when set to level.manager', () => {
+  describe('when set to new_level.manager', () => {
     before(() => {
       fx.set('new_superiorid', [{ id: 'superior_id', name: 'Superior', entityType: 'new_superior' }]);
       fx.set('new_divisionid', [{ id: 'division_id', name: 'Division', entityType: 'new_division' }]);
