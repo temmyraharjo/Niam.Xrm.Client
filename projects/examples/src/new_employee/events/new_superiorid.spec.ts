@@ -9,6 +9,13 @@ import { Fx } from '@niam/xrm-client';
 import { new_employee } from '../../entities';
 import * as  new_superiorid from './new_superiorid';
 
+function executePreSearchsAndGetFilters(lookupControl: LookupControlMock,
+    context: EventContextMock) {
+    lookupControl.preSearchHandlers.
+        forEach(preSearchFn => preSearchFn(context));
+    return lookupControl.filters;
+}
+
 describe('events/new_superiorid', () => {
     let context: EventContextMock;
     let fx: Fx<new_employee>;
@@ -37,10 +44,8 @@ describe('events/new_superiorid', () => {
             it('no filter applied', () => {
                 fx.set('new_level', null);
                 const superiorCtrl = fx.ctrl<LookupControlMock>('new_superiorid');
-                expect(superiorCtrl.preSearchHandlers.length).to.equal(1);
-                const preSearchFn = superiorCtrl.preSearchHandlers[0];
-                preSearchFn(context);
-                expect(superiorCtrl.filters.length).to.equal(0);
+                const filters = executePreSearchsAndGetFilters(superiorCtrl, context);
+                expect(filters.length).to.equal(0);
             });
         });
 
@@ -48,12 +53,9 @@ describe('events/new_superiorid', () => {
             it('new_superiorid will show supervisor', () => {
                 fx.set('new_level', new_employee.options.new_level.consultant);
                 const superiorCtrl = fx.ctrl<LookupControlMock>('new_superiorid');
-                expect(superiorCtrl.preSearchHandlers.length).to.equal(1);
-                const preSearchFn = superiorCtrl.preSearchHandlers[0];
-                preSearchFn(context);
-                expect(superiorCtrl.filters.length).to.equal(1);
-                const filterText = superiorCtrl.filters[0].filter;
-                expect(filterText).to.
+                const filters = executePreSearchsAndGetFilters(superiorCtrl, context);
+                expect(filters.length).to.equal(1);
+                expect(filters[0].filter).to.
                     equal('<filter type="and"><condition attribute="new_level" operator="eq" value="2"/></filter>');
             });
         });
@@ -62,12 +64,9 @@ describe('events/new_superiorid', () => {
             it('new_superiorid will show manager', () => {
                 fx.set('new_level', new_employee.options.new_level.supervisor);
                 const superiorCtrl = fx.ctrl<LookupControlMock>('new_superiorid');
-                expect(superiorCtrl.preSearchHandlers.length).to.equal(1);
-                const preSearchFn = superiorCtrl.preSearchHandlers[0];
-                preSearchFn(context);
-                expect(superiorCtrl.filters.length).to.equal(1);
-                const filterText = superiorCtrl.filters[0].filter;
-                expect(filterText).to.
+                const filters = executePreSearchsAndGetFilters(superiorCtrl, context);
+                expect(filters.length).to.equal(1);
+                expect(filters[0].filter).to.
                     equal('<filter type="and"><condition attribute="new_level" operator="eq" value="3"/></filter>');
             });
         });
@@ -76,10 +75,8 @@ describe('events/new_superiorid', () => {
             it('no filter applied', () => {
                 fx.set('new_level', new_employee.options.new_level.manager);
                 const superiorCtrl = fx.ctrl<LookupControlMock>('new_superiorid');
-                expect(superiorCtrl.preSearchHandlers.length).to.equal(1);
-                const preSearchFn = superiorCtrl.preSearchHandlers[0];
-                preSearchFn(context);
-                expect(superiorCtrl.filters.length).to.equal(0);
+                const filters = executePreSearchsAndGetFilters(superiorCtrl, context);
+                expect(filters.length).to.equal(0);
             });
         });
     });
