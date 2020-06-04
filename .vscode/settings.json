@@ -1,5 +1,9 @@
 {
     "typescript.tsdk": "node_modules/typescript/lib",
     "mochaExplorer.require": "ts-node/register",
-    "mochaExplorer.files": "**/*.spec.ts"
+    "mochaExplorer.files": "**/*.spec.ts",
+    "javascript.preferences.quoteStyle": "single",
+    "typescript.preferences.quoteStyle": "single",
+    "prettier.jsxSingleQuote": true,
+    "prettier.singleQuote": true
 }
