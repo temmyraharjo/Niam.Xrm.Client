@@ -1,5 +1,3 @@
-import { AttributeMetadata } from './attribute';
-
 export type EntityAttributeValue = 
   number |
   string | 
@@ -9,11 +7,4 @@ export type EntityAttributeValue =
 
 export type Entity = {
   [name: string]: EntityAttributeValue;
-}
-
-export interface EntityMetadata {
-  schemaName: string;
-  logicalName: string;
-  entitySetName: string;
-  attributes: AttributeMetadata[]
 }
