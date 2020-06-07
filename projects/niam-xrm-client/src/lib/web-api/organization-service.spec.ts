@@ -10,10 +10,11 @@ describe('web-api/organization-service', () => {
 
   beforeEach(() => {
     XrmMockGenerator.initialise();
+    service = new OrganizationService(Xrm.WebApi, [ENTITY_METADATA]);
   });
 
-  describe('call service.retrieve', () => {
-    it('return data', async () => {
+  describe('retrieve', () => {
+    beforeEach(() => {
       const data = {
         'id': 'ID',
         'name': 'NAME-001',
@@ -27,10 +28,9 @@ describe('web-api/organization-service', () => {
         'options@OData.Community.Display.V1.FormattedValue': 'OPTIONSET'
       };
       sinon.stub(Xrm.WebApi, 'retrieveRecord').resolves(data);
+    });
 
-      service = new OrganizationService(Xrm.WebApi);
-      service.init([ENTITY_METADATA]);
-
+    it('arg: entityname and id', async () => {
       const result = await service.retrieve<TestEntity>('testentity', 'ID');
 
       expect(result.id).to.equal('ID');
@@ -42,6 +42,30 @@ describe('web-api/organization-service', () => {
       expect(result.options).to.equal(0);
       expect(result.age).to.equal(10);
       expect(result.date.getTime()).to.equal(new Date('2020-06-03T09:37:55Z').getTime());
+    });
+
+    it('arg: lookup', async () => {
+      const lookup: Xrm.LookupValue = {
+        id: 'ID',
+        name: 'Test Entity',
+        entityType: 'testentity'
+      }
+      const result = await service.retrieve<TestEntity>(lookup);
+
+      expect(result.id).to.equal('ID');
+      expect(result.name).to.equal('NAME-001');
+    });
+
+    it('arg: lookup array', async () => {
+      const lookup: Xrm.LookupValue = {
+        id: 'ID',
+        name: 'Test Entity',
+        entityType: 'testentity'
+      }
+      const result = await service.retrieve<TestEntity>([lookup]);
+
+      expect(result.id).to.equal('ID');
+      expect(result.name).to.equal('NAME-001');
     });
   });
 });

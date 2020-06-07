@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import 'mocha';
-import { Fx } from './fx';
+import { Fx, FxGlobal, initFxOptions } from './fx';
 import { XrmMockGenerator } from 'xrm-mock';
+import { EntityMetadata } from './definitions';
 
 // https://github.com/microsoft/TypeScript/issues/32263
 export type TestEntity = {
@@ -131,5 +132,48 @@ describe('Fx', () => {
       expect(fx.ctrl<Xrm.Controls.OptionSetControl>('options')).is.not.null;
       expect(fx.ctrl<Xrm.Controls.GridControl>('grid')).is.not.null;
     });
+  });
+});
+
+describe('FxOptions', () => {
+  let global: FxGlobal = {
+    metadata: [
+      {
+        schemaName: 'globalentity',
+        logicalName: 'globalentity',
+        entitySetName: 'globalentities',
+        attributes: []
+      }
+    ]
+  };
+
+  it('can init from empty options', () => {
+    const options = initFxOptions(null, global);
+    expect(options.metadata).to.equal(global.metadata);
+  });
+
+  [
+    { name: 'null', metadata: null },
+    { name: 'undefined', metadata: undefined },
+    { name: 'empty', metadata: [] }
+  ].forEach(test => {
+    it(`use global.metadata when options.metadata is ${test.name}`, () => {
+      const options = initFxOptions({ metadata: test.metadata }, global);
+      expect(options.metadata).to.equal(global.metadata);
+    });
+  });
+
+  it('use custom metadata', () => {
+    const metadata: EntityMetadata[] = [
+      {
+        schemaName: 'customentity',
+        logicalName: 'customentity',
+        entitySetName: 'customentities',
+        attributes: []
+      }
+    ];
+
+    const options = initFxOptions({ metadata }, global);
+    expect(options.metadata).to.equal(metadata);
   });
 });

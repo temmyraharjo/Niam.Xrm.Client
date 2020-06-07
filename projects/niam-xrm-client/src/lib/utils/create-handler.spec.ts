@@ -32,4 +32,20 @@ describe('utils/create-handler', () => {
     const actual = XrmMockGenerator.formContext.getAttribute('total').getValue();
     expect(actual).to.equal(32);
   });
+
+  it('can create async handler', async () => {
+    const handler = createHandler<TestEntity>(fx => {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const first = fx.get('first') ?? 0;
+          const second = fx.get('second') ?? 0;
+          fx.set('total', first + second);
+          resolve();
+        }, 50);
+      });
+    });
+    await handler(context);
+    const actual = XrmMockGenerator.formContext.getAttribute('total').getValue();
+    expect(actual).to.equal(32);
+  });
 });

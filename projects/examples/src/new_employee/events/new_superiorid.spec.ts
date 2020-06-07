@@ -5,10 +5,10 @@ import {
   EventContextMock,
   LookupControlMock,
 } from 'xrm-mock';
-import { Fx } from '@niam/xrm-client';
-import { new_employee } from '../../entities';
-import * as new_superiorid from './new_superiorid';
 import * as sinon from 'sinon';
+import { Fx, FxOptions } from '@niam/xrm-client';
+import { new_employee, METADATA } from '../../entities';
+import * as new_superiorid from './new_superiorid';
 
 function executePreSearchsAndGetFilters(
   lookupControl: LookupControlMock,
@@ -20,12 +20,9 @@ function executePreSearchsAndGetFilters(
   return lookupControl.filters;
 }
 
-interface ApiEntity {
-  [key: string]: string | number;
-}
-
 describe('events/new_superiorid', () => {
   let context: EventContextMock;
+  let options: FxOptions;
   let fx: Fx<new_employee>;
 
   beforeEach(() => {
@@ -40,7 +37,10 @@ describe('events/new_superiorid', () => {
     attr.createLookup('new_divisionid', null);
 
     context = XrmMockGenerator.getEventContext();
-    fx = new Fx<new_employee>(context);
+    options = {
+      metadata: METADATA
+    };
+    fx = new Fx<new_employee>(context, options);
   });
 
   describe('registerPreSearch', () => {
@@ -91,55 +91,46 @@ describe('events/new_superiorid', () => {
     });
   });
 
-  describe('set new_divisionid', () => {
-    let superiodId = 'superior-id';
+  describe('when set new_superiorid to null', () => {
+    it('set new_divisionid to null', async () => {
+      fx.set('new_superiorid', null);
+      fx.set('new_divisionid', [
+        {
+          id: 'division-id',
+          name: 'Division',
+          entityType: 'new_division'
+        },
+      ]);
 
-    var initTestData = function (divisionid: string = '') {
-      const data: ApiEntity = {};
-      data['new_employeeid'] = superiodId;
-      if (divisionid) {
-        data['_new_divisionid_value'] = divisionid;
-        data[
-          '_new_divisionid_value@OData.Community.Display.V1.FormattedValue'
-        ] = 'IT Department';
-      }
+      await new_superiorid.changed(context, options);
+      const result: Xrm.LookupValue[] = fx.get('new_divisionid');
+      expect(result).is.null;
+    });
+  });
 
+  describe('when set new_superiorid to a value', () => {
+    it('set new_divisionid to new_superiorid.new_divisionid', async () => {
+      const data = {
+        '_new_divisionid_value': 'new_superiorid.new_divisionid',
+        '_new_divisionid_value@OData.Community.Display.V1.FormattedValue': 'IT Department',
+        '_new_divisionid_value@Microsoft.Dynamics.CRM.lookuplogicalname': 'new_division'
+      };
       sinon.stub(Xrm.WebApi, 'retrieveRecord').resolves(data);
-
       fx.set('new_superiorid', [
         {
-          id: superiodId,
+          id: 'superiorid',
+          name: 'Superior',
           entityType: 'new_employee',
         },
       ]);
-
-      fx.set('new_divisionid', [
-        {
-          entityType: 'new_division',
-          id: 'division-id',
-          name: 'Division',
-        },
-      ]);
-    };
-
-    describe('new_superior dont have new_divisionid', () => {
-      it('set new_divisionid to null', async () => {
-        initTestData();
-        await new_superiorid.changed(context);
-        const result: Xrm.LookupValue[] = fx.get('new_divisionid');
-        expect(result).to.null;
-      });
-    });
-
-    describe('new_superior have new_divisionid', () => {
-      it('set new_divisionid to new_superior.new_divisionid', async () => {
-        initTestData('parent-divisionid');
-        await new_superiorid.changed(context);
-        const result: Xrm.LookupValue[] = fx.get('new_divisionid');
-        expect(result.length).to.equal(1);
-        expect(result[0].id).to.equal('parent-divisionid');
-        expect(result[0].name).to.equal('IT Department');
-      });
+      fx.set('new_divisionid', null);
+      
+      await new_superiorid.changed(context, options);
+      const result: Xrm.LookupValue[] = fx.get('new_divisionid');
+      expect(result.length).to.equal(1);
+      expect(result[0].id).to.equal('new_superiorid.new_divisionid');
+      expect(result[0].name).to.equal('IT Department');
+      expect(result[0].entityType).to.equal('new_division');
     });
   });
 });

@@ -1,25 +1,21 @@
 import { Fx, createHandler } from '@niam/xrm-client';
 import { new_employee } from '../../entities';
 
-const preSearchHandler = createHandler<new_employee>((fx) => {
-  const level: number = fx.get('new_level');
-  if (!level) return;
+const LEVEL_FILTER = {
+  [new_employee.options.new_level.consultant]: new_employee.options.new_level.supervisor,
+  [new_employee.options.new_level.supervisor]: new_employee.options.new_level.manager
+}
 
-  const valid =
-    level === new_employee.options.new_level.consultant ||
-    level === new_employee.options.new_level.supervisor;
-  if (!valid) return;
+const PRE_SEARCH_HANDLER = createHandler<new_employee>((fx) => {
+  const level = fx.get('new_level');
+  if (!level) { return; }
 
-  const mappingLevel =
-    level === new_employee.options.new_level.consultant
-      ? new_employee.options.new_level.supervisor
-      : new_employee.options.new_level.manager;
+  const levelFilter = LEVEL_FILTER[level];
+  if (!levelFilter) { return; }
 
   const filter = [
     '<filter type="and">',
-    '<condition attribute="new_level" operator="eq" value="' +
-      mappingLevel +
-      '"/>',
+      `<condition attribute="new_level" operator="eq" value="${levelFilter}"/>`,
     '</filter>',
   ].join('');
 
@@ -27,35 +23,15 @@ const preSearchHandler = createHandler<new_employee>((fx) => {
 });
 
 export function initPreSearch(fx: Fx<new_employee>) {
-  fx.ctrl('new_superiorid').addPreSearch(preSearchHandler);
+  fx.ctrl('new_superiorid').addPreSearch(PRE_SEARCH_HANDLER);
 }
 
 export const changed = createHandler<new_employee>(async (fx) => {
   fx.set('new_divisionid', null);
 
-  const superiorRef: Xrm.LookupValue[] = fx.get('new_superiorid');
+  const superiorRef = fx.get('new_superiorid');
   if (!superiorRef) return;
 
-  const superiorId = superiorRef[0].id;
-  const result = await Xrm.WebApi.retrieveRecord(
-    'new_employee',
-    superiorId,
-    '?$select=_new_divisionid_value'
-  );
-
-  if (!result) return;
-
-  const divisionId = result['_new_divisionid_value'];
-  if (!divisionId) return;
-
-  const divisionName =
-    result['_new_divisionid_value@OData.Community.Display.V1.FormattedValue'];
-
-  fx.set('new_divisionid', [
-    {
-      entityType: 'new_division',
-      id: divisionId,
-      name: divisionName,
-    },
-  ]);
+  const superior = await fx.svc.retrieve<new_employee>(superiorRef, ['new_divisionid']);
+  fx.set('new_divisionid', superior.new_divisionid);
 });
