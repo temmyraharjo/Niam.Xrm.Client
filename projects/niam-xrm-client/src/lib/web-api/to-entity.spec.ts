@@ -96,4 +96,13 @@ describe('web-api/to-entity', () => {
     expect(entity.primarycontactid[0].entityType).to.equal('contact');
     expect(entity.primarycontactid[0].name).to.equal('Rene Valdes (sample)');
   });
+
+  it('ignore convert value for metadata that not exists', () => {
+    var apiResponse = {
+      ...WEB_API_RETRIEVE_RESPONSE,
+      'parent_id': 'THIS-IS-PARENT-ID'
+    };
+    const entity = toEntity<TestEntity>(ENTITY_METADATA, apiResponse);
+    expect(entity).to.not.null;
+  });
 });

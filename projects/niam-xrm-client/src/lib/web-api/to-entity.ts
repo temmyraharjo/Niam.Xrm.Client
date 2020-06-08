@@ -11,6 +11,7 @@ export function toEntity<TEntity extends Entity>(entityMetadata: EntityMetadata,
   const names = keys.filter(k => k.indexOf('@') === -1); // Ignore metadata properties
   const result = names
     .map(name => getAttribute(entityMetadata, webApiRetrieveResponse, name))
+    .filter(attribute => attribute)
     .reduce((e, attribute) => {
       e[attribute.name] = attribute.value;
       return e;
@@ -21,6 +22,8 @@ export function toEntity<TEntity extends Entity>(entityMetadata: EntityMetadata,
 function getAttribute(entityMetadata: EntityMetadata, webApiRetrieveResponse: { [k: string]: any }, name: string): Attribute {
   const attributeName = getAttributeName(name);
   const attributeMetadata = entityMetadata.attributes.find(md => md.logicalName === attributeName);
+  if (!attributeMetadata) return null;
+
   switch (attributeMetadata.attributeType) {
     case 'lookup':
     case 'owner':
@@ -30,7 +33,7 @@ function getAttribute(entityMetadata: EntityMetadata, webApiRetrieveResponse: { 
         entityType: webApiRetrieveResponse[`${name}@Microsoft.Dynamics.CRM.lookuplogicalname`],
       };
       return { name: attributeName, value: [lookupValue] };
-    
+
     case 'datetime':
       return { name: attributeName, value: new Date(webApiRetrieveResponse[name]) };
 

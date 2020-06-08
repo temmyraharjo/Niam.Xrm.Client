@@ -23,10 +23,41 @@ export const new_employee = Object.freeze({
     entitySetName: 'new_employees',
     attributes: [
       {
+        logicalName: 'new_firstname',
+        schemaName: 'new_firstname',
+        attributeType: 'string'
+      },
+      {
+        logicalName: 'new_lastname',
+        schemaName: 'new_lastname',
+        attributeType: 'string'
+      },
+      {
+        logicalName: 'new_fullname',
+        schemaName: 'new_fullname',
+        attributeType: 'string'
+      },
+      {
+        logicalName: 'new_level',
+        schemaName: 'new_level',
+        attributeType: 'picklist'
+      },
+      {
+        logicalName: 'new_superiorid',
+        schemaName: 'new_superiorid',
+        attributeType: 'lookup'
+      },
+      {
         logicalName: 'new_divisionid',
         schemaName: 'new_divisionid',
         attributeType: 'lookup'
-      }
+      },
+      {
+        logicalName: 'new_employeeid',
+        schemaName: 'new_employeeid',
+        attributeType: 'uniqueidentifier'
+      },
+
     ]
   } as EntityMetadata
 });
