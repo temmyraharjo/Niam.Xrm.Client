@@ -22,7 +22,10 @@ export function toEntity<TEntity extends Entity>(entityMetadata: EntityMetadata,
 function getAttribute(entityMetadata: EntityMetadata, webApiRetrieveResponse: { [k: string]: any }, name: string): Attribute {
   const attributeName = getAttributeName(name);
   const attributeMetadata = entityMetadata.attributes.find(md => md.logicalName === attributeName);
-  if (!attributeMetadata) return null;
+  if (!attributeMetadata) {
+    console.log(`entityMetadata ${entityMetadata.logicalName} doesn't have an attribute with name ${name}.`);
+    return null;
+  }
 
   switch (attributeMetadata.attributeType) {
     case 'lookup':
