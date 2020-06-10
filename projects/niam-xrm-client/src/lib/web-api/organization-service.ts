@@ -96,4 +96,14 @@ export class OrganizationService {
       );
     });
   }
+
+  // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/Xrm-WebApi/deleteRecord
+  delete(entityLogicalName: string, id: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.webApi.deleteRecord(entityLogicalName, id).then(
+        (success) =>  resolve(success),
+        (error) => reject(error)
+      );
+    });
+  }
 }

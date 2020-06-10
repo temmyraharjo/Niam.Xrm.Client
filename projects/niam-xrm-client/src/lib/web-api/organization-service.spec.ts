@@ -110,4 +110,18 @@ describe('web-api/organization-service', () => {
       expect(result.id).to.equal('new-create-id');
     });
   });
+
+  describe('delete', () => {
+    beforeEach(() => {
+      XrmMockGenerator.initialise();
+      service = new OrganizationService(Xrm.WebApi, METADATA_COLLECTION);
+
+      sinon.stub(Xrm.WebApi, 'deleteRecord').resolves('success-delete');
+    });
+
+    it('can delete', async () => {
+      const result = await service.delete('testentity', 'id');
+      expect(result).to.equal('success-delete');
+    });
+  });
 });
