@@ -9,7 +9,7 @@ export type TestEntity = {
   bool?: boolean;
   lookupid?: Xrm.LookupValue[];
   options?: number;
-}
+};
 
 export const ENTITY_METADATA: EntityMetadata = {
   schemaName: 'testentity',
@@ -50,6 +50,15 @@ export const ENTITY_METADATA: EntityMetadata = {
       attributeType: 'picklist',
       logicalName: 'options',
       schemaName: 'options',
-    }
+    },
   ],
 };
+
+export const PARENT_METADATA: EntityMetadata = {
+  schemaName: 'parent-entity',
+  logicalName: 'parent-entity',
+  entitySetName: 'parent-entities',
+  attributes: [],
+};
+
+export const METADATA_COLLECTION = [ENTITY_METADATA, PARENT_METADATA];

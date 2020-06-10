@@ -5,13 +5,11 @@ import {
   LookupAttributeMetadata,
   OwnerAttributeMetadata
 } from '../definitions';
+import { getAttributeMetadata } from './helper';
 
 export function select<T extends Entity>(entityMetadata: EntityMetadata, attributes: KeyOf<T>[]): string {
   const selectParts = attributes.map(name => {
-    const attributeMetadata = entityMetadata.attributes.find(md => md.logicalName === name);
-    if (!attributeMetadata) {
-      throw new Error(`No attribute metadata found for '${name}'`);
-    }
+    const attributeMetadata = getAttributeMetadata(entityMetadata, name);
 
     switch (attributeMetadata.attributeType) {
       case 'lookup': return getLookupQuerySelect(attributeMetadata as LookupAttributeMetadata);

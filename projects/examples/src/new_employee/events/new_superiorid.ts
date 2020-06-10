@@ -7,7 +7,7 @@ const LEVEL_FILTER = {
 }
 
 const PRE_SEARCH_HANDLER = createHandler<new_employee>((fx) => {
-  const level = fx.get<number>('new_level');
+  const level = fx.get('new_level');
   if (!level) { return; }
 
   const levelFilter = LEVEL_FILTER[level];
