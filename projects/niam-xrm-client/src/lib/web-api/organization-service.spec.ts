@@ -116,12 +116,40 @@ describe('web-api/organization-service', () => {
       XrmMockGenerator.initialise();
       service = new OrganizationService(Xrm.WebApi, METADATA_COLLECTION);
 
-      sinon.stub(Xrm.WebApi, 'deleteRecord').resolves('success-delete');
+      sinon.stub(Xrm.WebApi, 'deleteRecord').resolves();
     });
 
     it('can delete', async () => {
-      const result = await service.delete('testentity', 'id');
-      expect(result).to.equal('success-delete');
+      await service.delete('testentity', 'id');
+    });
+  });
+
+  describe('update', () => {
+    const updateEntity: TestEntity = {
+      id: 'this-is-id',
+      name: 'Name',
+      age: 15,
+      bool: true,
+      date: new Date(2020, 1, 1),
+      lookupid: [
+        {
+          entityType: 'parent-entity',
+          id: 'parent-id',
+          name: 'Parent Entity',
+        },
+      ],
+      options: 1,
+    };
+
+    beforeEach(() => {
+      XrmMockGenerator.initialise();
+      service = new OrganizationService(Xrm.WebApi, METADATA_COLLECTION);
+
+      sinon.stub(Xrm.WebApi, 'updateRecord').resolves();
+    });
+
+    it('can update', async () => {
+      await service.update('testentity', 'id', updateEntity);
     });
   });
 });

@@ -98,10 +98,30 @@ export class OrganizationService {
   }
 
   // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/Xrm-WebApi/deleteRecord
-  delete(entityLogicalName: string, id: string): Promise<string> {
+  delete(entityLogicalName: string, id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.webApi.deleteRecord(entityLogicalName, id).then(
-        (success) =>  resolve(success),
+        () => resolve(),
+        (error) => reject(error)
+      );
+    });
+  }
+
+  // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/xrm-webapi/updaterecord
+  update<TEntity extends Entity = Entity>(
+    entityLogicalName: string,
+    id: string,
+    entity: TEntity
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const webapiEntity = toWebApiEntityRequest(
+        this.metadata,
+        entityLogicalName,
+        entity
+      );
+
+      this.webApi.updateRecord(entityLogicalName, id, webapiEntity).then(
+        () => resolve(),
         (error) => reject(error)
       );
     });
