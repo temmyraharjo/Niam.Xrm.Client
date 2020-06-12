@@ -3,6 +3,8 @@ import { v4 as guid } from 'uuid';
 import { toEntity } from './to-entity';
 import { update } from './update';
 import { toWebApiEntity } from './utils/to-web-api-entity';
+import { getWebApiOption } from './get-web-api-option';
+import { select } from './select';
 
 export class InMemoryWebApi implements Xrm.WebApi {
   private entities: Entity[] = [];
@@ -96,7 +98,9 @@ export class InMemoryWebApi implements Xrm.WebApi {
     const promise = new Promise((resolve, reject) => {
       try {
           const entity = this.get(entityLogicalName, id);
-          const webEntity = toWebApiEntity(entity);
+          const webOption = getWebApiOption(options);
+          const selectEntity = select(entity, webOption.select);
+          const webEntity = toWebApiEntity(selectEntity);
           resolve(webEntity);
       } catch (ex) {
           reject(ex);
