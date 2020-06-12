@@ -16,7 +16,6 @@
         "@types/uuid": "^8.0.0",
         "@types/xrm": "^9.0.27",
         "chai": "^4.2.0",
-        "fakexrmeasy": "^1.0.9",
         "mocha": "^7.1.2",
         "rollup": "^2.10.2",
         "rollup-plugin-copy": "^3.3.0",
