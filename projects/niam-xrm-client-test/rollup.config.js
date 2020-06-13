@@ -12,6 +12,7 @@ export default commandLineArgs => {
     ]
   
   return {
+    external: ['uuid'],
     input: 'src/main.ts',
     output: {
       dir: 'dist',

@@ -1,4 +1,4 @@
-import { WebApiOption } from './definitions/web-api-option';
+import { WebApiOption } from '../definitions/web-api-option';
 
 // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/xrm-webapi/retrievemultiplerecords
 // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/xrm-webapi/retrieverecord

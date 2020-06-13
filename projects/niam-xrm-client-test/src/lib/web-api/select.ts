@@ -1,4 +1,4 @@
-import { Entity } from './definitions/entity';
+import { Entity } from '../definitions/entity';
 
 export function select(entity: Entity, select: string): Entity {
   if (!select) return entity;

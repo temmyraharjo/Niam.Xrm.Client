@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import 'mocha';
-import { Entity } from './definitions/entity';
+import { Entity } from '../definitions/entity';
 import { select } from './select';
 
 describe('select', () => {

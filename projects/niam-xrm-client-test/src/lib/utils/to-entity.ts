@@ -1,4 +1,4 @@
-import { Entity } from './definitions/entity';
+import { Entity } from '../definitions/entity';
 
 export function toEntity(
   entityLogicalName: string,

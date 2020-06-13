@@ -1,14 +1,15 @@
 import { expect } from 'chai';
 import 'mocha';
-import { InMemoryWebApi } from './in-memory-web-api';
+import { TestApiContext } from './test-api-context';
 import { v4 as guid } from 'uuid';
 import { Entity } from './definitions/entity';
 
-describe('in-memory-web-api', () => {
-  let webApi: InMemoryWebApi;
+describe('test-api-context', () => {
+  let context: TestApiContext;
+
   describe('in-memory-web-api/createRecord', () => {
     beforeEach(() => {
-      webApi = new InMemoryWebApi();
+      context = new TestApiContext();
     });
 
     it('can createRecord', async () => {
@@ -18,15 +19,17 @@ describe('in-memory-web-api', () => {
         active: true,
       };
 
-      const result = await webApi.createRecord('entity', entity);
-      expect(result.entityType).to.equal('entity');
-      expect(result.id).to.not.null;
+      const result = await context.webApi.createRecord('entity', entity);
+      expect(context.createdEntities.length).to.equal(1);
+      const created = context.createdEntities[0];
+      expect(created.id).to.equal(result.id);
+      expect(created.logicalName).to.equal(result.entityType);
     });
   });
 
   describe('in-memory-web-api/updateRecord', () => {
     beforeEach(() => {
-      webApi = new InMemoryWebApi();
+      context = new TestApiContext();
     });
 
     it('can updateRecord', async () => {
@@ -40,16 +43,16 @@ describe('in-memory-web-api', () => {
         active: true,
       };
 
-      webApi.init([entity]);
+      context.init([entity]);
 
       const update = {
         name: 'update-name',
         active: false,
       };
 
-      await webApi.updateRecord('entity', id, update);
+      await context.webApi.updateRecord('entity', id, update);
 
-      const result = webApi.get('entity', id);
+      const result = context.updatedEntities[0];
       expect(result.name).to.equal('update-name');
       expect(result.active).to.false;
       expect(result.fullname).to.equal('not-changed');
@@ -61,7 +64,7 @@ describe('in-memory-web-api', () => {
         active: false,
       };
 
-      webApi.updateRecord('entity', guid(), update).then(
+      context.webApi.updateRecord('entity', guid(), update).then(
         (_) => {},
         (error) => {
           expect(error).to.not.null;
@@ -72,7 +75,7 @@ describe('in-memory-web-api', () => {
 
   describe('in-memory-web-api/deleteRecord', () => {
     beforeEach(() => {
-      webApi = new InMemoryWebApi();
+      context = new TestApiContext();
     });
 
     it('can delete', async () => {
@@ -86,13 +89,13 @@ describe('in-memory-web-api', () => {
         active: true,
       };
 
-      webApi.init([entity]);
-      await webApi.deleteRecord('entity', id);
-      expect(webApi.get('entity', id)).to.null;
+      context.init([entity]);
+      await context.webApi.deleteRecord('entity', id);
+      expect(context.webApi.get('entity', id)).to.null;
     });
 
     it('deleteRecord failed', async () => {
-      webApi.deleteRecord('entity', guid()).then(
+      context.webApi.deleteRecord('entity', guid()).then(
         (_) => {},
         (error) => {
           expect(error).to.not.null;
@@ -124,12 +127,12 @@ describe('in-memory-web-api', () => {
     };
 
     beforeEach(() => {
-      webApi = new InMemoryWebApi();
-      webApi.init([record]);
+      context = new TestApiContext();
+      context.init([record]);
     });
 
     it('can retrieve record', async () => {
-      const result = await webApi.retrieveRecord('entity', entityId);
+      const result = await context.webApi.retrieveRecord('entity', entityId);
 
       expect(result.name).to.equal('A. Datum Corporation (sample)');
       expect(
@@ -141,7 +144,7 @@ describe('in-memory-web-api', () => {
     });
 
     it('can retrieve record with select statement', async () => {
-      const result = await webApi.retrieveRecord(
+      const result = await context.webApi.retrieveRecord(
         'entity',
         entityId,
         '?$select=name,statuscode,_transactioncurrencyid_value'

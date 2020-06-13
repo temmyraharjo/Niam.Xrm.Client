@@ -8,7 +8,8 @@
     "build:prod": "rollup -c --prod"
   },
   "dependencies": {
-    "@niam/xrm-client": "^0.0.1"
+    "@niam/xrm-client": "^0.0.1",
+    "@niam/xrm-client-test": "^0.0.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^7.1.3",
