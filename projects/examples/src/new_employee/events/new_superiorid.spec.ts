@@ -9,6 +9,7 @@ import * as sinon from 'sinon';
 import { Fx, FxOptions } from '@niam/xrm-client';
 import { new_employee, METADATA } from '../../entities';
 import * as new_superiorid from './new_superiorid';
+import { TestApiContext } from '@niam/xrm-client-test';
 
 function executePreSearchsAndGetFilters(
   lookupControl: LookupControlMock,
@@ -24,6 +25,7 @@ describe('events/new_superiorid', () => {
   let context: EventContextMock;
   let options: FxOptions;
   let fx: Fx<new_employee>;
+  let testContext : TestApiContext;
 
   beforeEach(() => {
     XrmMockGenerator.initialise();
@@ -41,6 +43,8 @@ describe('events/new_superiorid', () => {
       metadata: METADATA
     };
     fx = new Fx<new_employee>(context, options);
+    testContext = new TestApiContext();
+    sinon.replace(Xrm, 'WebApi', testContext.webApi);
   });
 
   describe('registerPreSearch', () => {
@@ -111,11 +115,13 @@ describe('events/new_superiorid', () => {
   describe('when set new_superiorid to a value', () => {
     it('set new_divisionid to new_superiorid.new_divisionid', async () => {
       const data = {
+        id: 'superiorid',
+        logicalName: 'new_employee',
         '_new_divisionid_value': 'new_superiorid.new_divisionid',
         '_new_divisionid_value@OData.Community.Display.V1.FormattedValue': 'IT Department',
         '_new_divisionid_value@Microsoft.Dynamics.CRM.lookuplogicalname': 'new_division'
       };
-      sinon.stub(Xrm.WebApi, 'retrieveRecord').resolves(data);
+      testContext.init([data]);
       fx.set('new_superiorid', [
         {
           id: 'superiorid',
@@ -124,7 +130,7 @@ describe('events/new_superiorid', () => {
         },
       ]);
       fx.set('new_divisionid', null);
-      
+
       await new_superiorid.changed(context, options);
       const result: Xrm.LookupValue[] = fx.get('new_divisionid');
       expect(result.length).to.equal(1);

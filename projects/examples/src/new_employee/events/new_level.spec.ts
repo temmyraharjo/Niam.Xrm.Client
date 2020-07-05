@@ -2,9 +2,7 @@ import { expect } from 'chai';
 import 'mocha';
 import {
   XrmMockGenerator,
-  EventContextMock,
-  LookupControlMock
-} from 'xrm-mock';
+  EventContextMock} from 'xrm-mock';
 import { Fx } from '@niam/xrm-client';
 import { new_employee } from '../../entities';
 import * as new_level from './new_level';

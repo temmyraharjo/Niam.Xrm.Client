@@ -1,6 +1,7 @@
 {
-    "mochaExplorer.fullTrace": true,
     "mochaExplorer.require": "ts-node/register",
     "mochaExplorer.files": "**/*.spec.ts",
-    "mochaExplorer.ui": "bdd"
+    "mochaExplorer.ui": "bdd",
+    "mochaExplorer.logpanel": true,
+    "mochaExplorer.mochaPath": null
 }

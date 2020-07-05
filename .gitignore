@@ -7,5 +7,4 @@ dist/bundle.js.map
 .idea/shelf
 dist/
 .vs/**/*
-.vscode/**/*
 yarn-error.log
