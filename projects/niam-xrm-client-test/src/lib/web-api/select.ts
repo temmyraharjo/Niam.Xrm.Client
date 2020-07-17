@@ -1,11 +1,12 @@
 import { Entity } from '../definitions/entity';
+import { WebApiOption } from '../definitions';
 
-export function select(entity: Entity, select: string): Entity {
-  if (!select) return entity;
-  if (select === '') return entity;
-  
+export function select(entity: Entity, webOption: WebApiOption): Entity {
+  const valid = webOption && webOption.select && webOption.select !== '';
+  if (!valid) return entity;
+
   const entityAttributes = Object.keys(entity);
-  const result = select
+  const result = webOption.select
     .split(',')
     .map((e) => e.trim())
     .filter((e) => e)

@@ -26,7 +26,9 @@ describe('select', () => {
     };
     const result = select(
       record,
-      'name,statuscode,_transactioncurrencyid_value'
+      {
+        select: 'name,statuscode,_transactioncurrencyid_value'
+      }
     );
     expect(result.name).to.equal('A. Datum Corporation (sample)');
     expect(result['statuscode']).to.equal(1);

@@ -1,7 +1,7 @@
 {
     "mochaExplorer.require": "ts-node/register",
     "mochaExplorer.files": "**/*.spec.ts",
-    "mochaExplorer.ui": "bdd",
     "mochaExplorer.logpanel": true,
-    "mochaExplorer.mochaPath": null
+    "mochaExplorer.ui": "bdd",
+    "debug.javascript.suggestPrettyPrinting": false
 }
