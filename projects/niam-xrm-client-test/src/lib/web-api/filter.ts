@@ -25,7 +25,8 @@ export interface filterType {
   value: string;
   logicalOperator?: logicalOperator;
   not?: boolean;
-  filterTypes?: filterType[];
+  bracketOpenCt: number;
+  bracketCloseCt: number;
 }
 
 export function filter(entities: Entity[], webOption: WebApiOption): Entity[] {
@@ -40,14 +41,55 @@ export function parsingValue(value: string): string {
     value.endsWith("'") || value.endsWith('"')
       ? value.length - 1
       : value.length;
-  const result = value.substring(from, to);
+  let result = value.substring(from, to);
+  mappingLogicalOperators.
+    forEach(e => result = result.replace(e.replaceWord, e.word));
 
+  //if(result.endsWith(')')
   return result;
 }
 
 export type logicalType = { text: string; logicalOperator?: logicalOperator };
+const mappingLogicalOperators = [{
+  word: ' and ',
+  replaceWord: ' _&_&_ '
+},
+{
+  word: ' or ',
+  replaceWord: ' _|_|_ '
+}
+];
+
+export function transformText(value: string): string {
+  const quoteChars = ['"', "'"];
+  let tempText = value;
+
+  const valid = quoteChars.some(e => tempText.indexOf(e) > -1);
+  if (!valid) return tempText;
+
+  var quotePositions: number[] = [];
+  for (let i = 0; i < tempText.length; i++) {
+    const letter = tempText[i];
+    if (!quoteChars.some(e => letter === e)) continue;
+    quotePositions.push(i);
+  }
+
+  for (var i = 0; i < quotePositions.length - 1; i++) {
+    const beginIndex = quotePositions[i];
+    const endIndex = quotePositions[i + 1];
+    const checkText = tempText.substring(beginIndex, endIndex);
+
+    mappingLogicalOperators.forEach(map => {
+      const replaceText = checkText.replace(map.word, map.replaceWord);
+      tempText = tempText.replace(checkText, replaceText);
+    });
+  }
+
+  return tempText;
+}
 
 export function getCommands(value: string): filterType[] {
+  value = transformText(value);
   const result: filterType[] = [];
   const logicalOperators = [' and ', ' or '];
 
@@ -96,8 +138,8 @@ export function getCommands(value: string): filterType[] {
         specialStr.trim().indexOf('contains(') > -1
           ? operator.contains
           : specialStr.trim().indexOf('endswith(') > -1
-          ? operator.endswith
-          : operator.startswith;
+            ? operator.endswith
+            : operator.startswith;
 
       var isNot = datum.text.startsWith('not ');
 
@@ -109,16 +151,17 @@ export function getCommands(value: string): filterType[] {
         .replace(specialStr, '');
 
       const data = logicalTextCommand.split(',').map((e) => e.trim());
-      const attributeName = data.shift();
+      const attributeData = getAttributeData(data.shift());
 
       datum.text = '';
-
+      const specialValue = parsingValue(data.join(','));
       const filter: filterType = {
-        attributeName: attributeName,
+        attributeName: attributeData.attributeName,
         operator: operatorType,
-        value: parsingValue(data.join(',')),
+        value: specialValue,
         logicalOperator: datum.logicalOperator,
-        not: isNot
+        not: isNot,
+        bracketOpenCt: attributeData.bracketOpenCt
       };
 
       result.push(filter);
@@ -134,14 +177,14 @@ export function getCommands(value: string): filterType[] {
         operatorStr.trim() === 'eq'
           ? operator.eq
           : operatorStr.trim() === 'ne'
-          ? operator.ne
-          : operatorStr.trim() === 'gt'
-          ? operator.gt
-          : operatorStr.trim() === 'ge'
-          ? operator.ge
-          : operatorStr.trim() === 'lt'
-          ? operator.lt
-          : operator.le;
+            ? operator.ne
+            : operatorStr.trim() === 'gt'
+              ? operator.gt
+              : operatorStr.trim() === 'ge'
+                ? operator.ge
+                : operatorStr.trim() === 'lt'
+                  ? operator.lt
+                  : operator.le;
       const attributeName = data[0];
       const filter: filterType = {
         attributeName: attributeName,
@@ -155,6 +198,26 @@ export function getCommands(value: string): filterType[] {
   }
 
   return result;
+}
+
+function getAttributeData(attributeName: string): 
+  { attributeName: string, bracketOpenCt: number } {
+  if (!attributeName.startsWith('(')) 
+    return { bracketOpenCt: 0, attributeName: attributeName };
+
+  let found = 0;
+  let position = 0;
+  for (const letter of attributeName) {
+    position++;
+    if (letter === '(') {
+      found++;
+    }else {
+      break;
+    }
+  }
+
+  return {bracketOpenCt: found, 
+    attributeName = attributeName.substring(position, attributeName.length)};
 }
 
 function removeOccurrence(
