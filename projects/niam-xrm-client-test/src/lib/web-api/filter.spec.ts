@@ -6,21 +6,25 @@ describe('filter tests', () => {
     it('it can parsing value', () => {
       let value = "'('123-'123')'";
       let result = parsingValue(value);
-      expect(result).to.equal("('123-'123')");
+      expect(result.text).to.equal("('123-'123')");
 
       value = '"hello"';
       result = parsingValue(value);
-      expect(result).to.equal('hello');
+      expect(result.text).to.equal('hello');
     });
   });
 
   describe('transform value for logicalOperator', () => {
     it('can transform text for logicalOperator', () => {
       let command = "account eq 'this is or operator'";
-      expect(transformText(command)).to.equal("account eq 'this is _|_|_ operator'");
+      expect(transformText(command)).to.equal(
+        "account eq 'this is _|_|_ operator'"
+      );
 
       command = "account eq 'this is and operator'";
-      expect(transformText(command)).to.equal("account eq 'this is _&_&_ operator'");
+      expect(transformText(command)).to.equal(
+        "account eq 'this is _&_&_ operator'"
+      );
     });
   });
 
@@ -89,15 +93,29 @@ describe('filter tests', () => {
     });
 
     it('can identified bracket', () => {
-      let command =
-        '(((accountid eq 123-123)))';
+      let command = '(((accountid eq 123-123)))';
       let result = getCommands(command);
-      expect(result.length).to.equal(3);
+      expect(result.length).to.equal(1);
       expect(result[0].attributeName).to.equal('accountid');
       expect(result[0].operator).to.equal(operator.eq);
       expect(result[0].value).to.equal('123-123');
       expect(result[0].bracketOpenCt).to.equal(3);
       expect(result[0].bracketCloseCt).to.equal(3);
+
+      command = '(((accountid eq 123-123) or customerid eq 123-123))';
+      result = getCommands(command);
+      expect(result.length).to.equal(2);
+      expect(result[0].attributeName).to.equal('accountid');
+      expect(result[0].operator).to.equal(operator.eq);
+      expect(result[0].value).to.equal('123-123');
+      expect(result[0].bracketOpenCt).to.equal(3);
+      expect(result[0].bracketCloseCt).to.equal(1);
+
+      expect(result[1].attributeName).to.equal('customerid');
+      expect(result[1].operator).to.equal(operator.eq);
+      expect(result[1].value).to.equal('123-123');
+      expect(result[1].bracketOpenCt).to.equal(0);
+      expect(result[1].bracketCloseCt).to.equal(2);
     });
   });
 });

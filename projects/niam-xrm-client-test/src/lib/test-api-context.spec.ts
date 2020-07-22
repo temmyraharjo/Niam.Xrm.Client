@@ -383,8 +383,8 @@ describe('test-api-context', () => {
 
     it('can retrieve multiple records by accountid', async () => {
       const result = await context.webApi.retrieveMultipleRecords(
-        'entity',
-        '?$filter=entityid eq ' + entityId
+        'account',
+        '?$filter=accountid eq ' + entityId +' and address1_postalcode eq "650031"'
       );
 
       expect(result.entities.length).to.equal(1);
