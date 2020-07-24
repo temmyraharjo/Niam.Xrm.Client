@@ -1,4 +1,4 @@
-import { parsingValue, getCommands, operator, transformText } from './filter';
+import { parsingValue, getCommands, operator, transformText, getHierarchyCommands } from './filter';
 import { expect } from 'chai';
 
 describe('filter tests', () => {
@@ -25,6 +25,30 @@ describe('filter tests', () => {
       expect(transformText(command)).to.equal(
         "account eq 'this is _&_&_ operator'"
       );
+    });
+  });
+
+  describe('getHierarchy', () => {
+    it('can identified simple command', () => {
+      let command = "accountid eq 123 and accountid eq 123";
+      let result = getHierarchyCommands(command);
+
+      expect(result.length).to.equal(2);
+
+      command = "(a eq 123 and b eq 123)";
+      result = getHierarchyCommands(command);
+      expect(result.length).to.equal(1);
+      expect(result[0].attributeName).to.equal('a');
+      expect(result[0].filterTypes.length).to.equal(1);
+      expect(result[0].filterTypes[0].attributeName).to.equal('b');
+
+      command = "(a eq 123 and b eq 123) or c eq 341";
+      result = getHierarchyCommands(command);
+      expect(result.length).to.equal(3);
+      expect(result[0].attributeName).to.equal('a');
+      expect(result[0].filterTypes.length).to.equal(1);
+      expect(result[0].filterTypes[0].attributeName).to.equal('b');
+      expect(result[1].attributeName).to.equal('c');
     });
   });
 

@@ -19,6 +19,15 @@ export enum logicalOperator {
   not,
 }
 
+export interface hierarchyFilterType {
+  attributeName: string;
+  operator: operator;
+  value: string;
+  logicalOperator?: logicalOperator;
+  not?: boolean;
+  filterTypes: hierarchyFilterType[];
+}
+
 export interface filterType {
   attributeName: string;
   operator: operator;
@@ -27,6 +36,7 @@ export interface filterType {
   not?: boolean;
   bracketOpenCt: number;
   bracketCloseCt: number;
+  totalBracket?: number;
 }
 
 export function filter(entities: Entity[], webOption: WebApiOption): Entity[] {
@@ -55,6 +65,55 @@ export function filter(entities: Entity[], webOption: WebApiOption): Entity[] {
   }
 
   return resultEntities;
+}
+
+function setRefrentialCommands(
+  result: hierarchyFilterType[],
+  currentCommand: filterType,
+  commands: filterType[],
+  parentHierarchy: hierarchyFilterType = null
+): hierarchyFilterType[] {
+  const currentHierarchy: hierarchyFilterType = {
+    attributeName: currentCommand.attributeName,
+    operator: currentCommand.operator,
+    value: currentCommand.value,
+    filterTypes: [],
+    logicalOperator: currentCommand.logicalOperator,
+    not: currentCommand.not,
+  };
+  if (
+    commands.length > 0 &&
+    currentCommand.bracketOpenCt != currentCommand.bracketCloseCt
+  ) {
+    do {
+      var command = commands.shift();
+      if (!command) {
+        return;
+      }
+      setRefrentialCommands(result, command, commands, currentHierarchy);
+      currentCommand.bracketOpenCt += command.bracketOpenCt;
+      currentCommand.bracketCloseCt += command.bracketCloseCt;
+    } while (currentCommand.bracketOpenCt != currentCommand.bracketCloseCt);
+
+    result.push(currentHierarchy);
+  } else if (parentHierarchy) {
+    parentHierarchy.filterTypes = parentHierarchy.filterTypes.concat(
+      currentHierarchy
+    );
+  } else {
+    result.push(currentHierarchy);
+  }
+}
+
+export function getHierarchyCommands(query: string): hierarchyFilterType[] {
+  const commands = getCommands(query);
+  if (commands.length === 0) return null;
+  const result: hierarchyFilterType[] = [];
+  do {
+    const currentCommand = commands.shift();
+    setRefrentialCommands(result, currentCommand, commands);
+  } while (commands.length > 0);
+  return result;
 }
 
 function getValueWithoutBracket(value: string, isHaveQuoteChar: boolean) {
@@ -147,46 +206,39 @@ export function transformText(value: string): string {
   return tempText;
 }
 
-export function getCommands(value: string): filterType[] {
-  value = transformText(value);
+export function getCommands(query: string): filterType[] {
+  query = transformText(query);
   const result: filterType[] = [];
-  const logicalOperators = [' and ', ' or '];
 
   const commonOperators = [' eq ', ' ne ', ' gt ', ' ge ', ' lt ', ' le '];
   const specialOperators = ['contains(', 'endswith(', 'startswith('];
-  let tempText = value;
 
   let logicalTypes: logicalType[] = [];
-  for (const logicalOperatorStr of logicalOperators) {
-    if (tempText.indexOf(logicalOperatorStr) === -1) continue;
-    const logicalOperatorType =
-      logicalOperatorStr.trim() === 'and'
-        ? logicalOperator.and
-        : logicalOperator.or;
+  const logicalOperators = ['and', 'or'];
 
-    logicalTypes = logicalTypes.concat(
-      tempText
-        .split(logicalOperatorStr)
-        .filter((e) => e.trim())
-        .map((e) => {
-          return {
-            text: e.trim(),
-            logicalOperator: logicalOperatorType,
-          };
-        })
-    );
+  const words = query.split(' ');
+  let lastLogicalOperator: logicalOperator = null;
+  let lastIndexWord = 0;
+  for (let i = 0; i < words.length; i++) {
+    if (i == words.length - 1) {
+      logicalTypes.push({
+        text: words.splice(lastIndexWord, i).join(' '),
+        logicalOperator: lastLogicalOperator,
+      });
+      break;
+    }
 
-    tempText = removeOccurrence(
-      tempText,
-      logicalOperatorStr,
-      logicalTypes.map((e) => e.text)
-    );
-  }
+    const word = words[i];
+    if (logicalOperators.indexOf(word) === -1) continue;
 
-  if (logicalTypes.length === 0) {
     logicalTypes.push({
-      text: tempText,
+      text: words.splice(lastIndexWord, i - 1).join(' '),
+      logicalOperator: lastLogicalOperator,
     });
+
+    lastLogicalOperator =
+      word === 'and' ? logicalOperator.and : logicalOperator.or;
+    lastIndexWord = i;
   }
 
   for (const datum of logicalTypes) {
