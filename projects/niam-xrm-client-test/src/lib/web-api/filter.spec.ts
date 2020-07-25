@@ -44,7 +44,7 @@ describe('filter tests', () => {
 
       command = "(a eq 123 and b eq 123) or c eq 341";
       result = getHierarchyCommands(command);
-      expect(result.length).to.equal(3);
+      expect(result.length).to.equal(2);
       expect(result[0].attributeName).to.equal('a');
       expect(result[0].filterTypes.length).to.equal(1);
       expect(result[0].filterTypes[0].attributeName).to.equal('b');

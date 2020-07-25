@@ -81,7 +81,12 @@ function setRefrentialCommands(
     logicalOperator: currentCommand.logicalOperator,
     not: currentCommand.not,
   };
-  if (
+  if (parentHierarchy) {
+    parentHierarchy.filterTypes = parentHierarchy.filterTypes.concat(
+      currentHierarchy
+    );
+  }
+  else if (
     commands.length > 0 &&
     currentCommand.bracketOpenCt != currentCommand.bracketCloseCt
   ) {
@@ -91,15 +96,12 @@ function setRefrentialCommands(
         return;
       }
       setRefrentialCommands(result, command, commands, currentHierarchy);
+
       currentCommand.bracketOpenCt += command.bracketOpenCt;
       currentCommand.bracketCloseCt += command.bracketCloseCt;
     } while (currentCommand.bracketOpenCt != currentCommand.bracketCloseCt);
 
     result.push(currentHierarchy);
-  } else if (parentHierarchy) {
-    parentHierarchy.filterTypes = parentHierarchy.filterTypes.concat(
-      currentHierarchy
-    );
   } else {
     result.push(currentHierarchy);
   }
@@ -222,7 +224,7 @@ export function getCommands(query: string): filterType[] {
   for (let i = 0; i < words.length; i++) {
     if (i == words.length - 1) {
       logicalTypes.push({
-        text: words.splice(lastIndexWord, i).join(' '),
+        text: words.slice(lastIndexWord, i + 1).join(' '),
         logicalOperator: lastLogicalOperator,
       });
       break;
@@ -232,13 +234,13 @@ export function getCommands(query: string): filterType[] {
     if (logicalOperators.indexOf(word) === -1) continue;
 
     logicalTypes.push({
-      text: words.splice(lastIndexWord, i - 1).join(' '),
+      text: words.slice(lastIndexWord, i).join(' '),
       logicalOperator: lastLogicalOperator,
     });
 
     lastLogicalOperator =
       word === 'and' ? logicalOperator.and : logicalOperator.or;
-    lastIndexWord = i;
+    lastIndexWord = i + 1;
   }
 
   for (const datum of logicalTypes) {
@@ -249,8 +251,8 @@ export function getCommands(query: string): filterType[] {
         specialStr.trim().indexOf('contains(') > -1
           ? operator.contains
           : specialStr.trim().indexOf('endswith(') > -1
-          ? operator.endswith
-          : operator.startswith;
+            ? operator.endswith
+            : operator.startswith;
 
       var isNot = datum.text.startsWith('not ');
 
@@ -289,14 +291,14 @@ export function getCommands(query: string): filterType[] {
         operatorStr.trim() === 'eq'
           ? operator.eq
           : operatorStr.trim() === 'ne'
-          ? operator.ne
-          : operatorStr.trim() === 'gt'
-          ? operator.gt
-          : operatorStr.trim() === 'ge'
-          ? operator.ge
-          : operatorStr.trim() === 'lt'
-          ? operator.lt
-          : operator.le;
+            ? operator.ne
+            : operatorStr.trim() === 'gt'
+              ? operator.gt
+              : operatorStr.trim() === 'ge'
+                ? operator.ge
+                : operatorStr.trim() === 'lt'
+                  ? operator.lt
+                  : operator.le;
       const attributeData = getAttributeData(data[0]);
       const commonData = parsingValue(data[1]);
       const filter: filterType = {
