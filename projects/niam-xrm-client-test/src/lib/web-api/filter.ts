@@ -39,23 +39,95 @@ export interface filterType {
   totalBracket?: number;
 }
 
+export function parseValue(value: any) {
+  //string | number | boolean | null
+  if(value === null || value === undefined) return value;
+
+  if (Number(value)) {
+    return Number(value);
+  } 
+
+  const boolValue = value as boolean;
+  if(boolValue) {
+    return boolValue;
+  }
+  
+  const stringValue = value as string;
+  let date = new Date(stringValue);
+
+  if (date instanceof Date && !isNaN(date.getTime())) {
+    return date;
+  }
+
+  return stringValue;
+}
+
+function isValid(
+  entity: Entity,
+  command: hierarchyFilterType,
+  parentCommand: hierarchyFilterType = null,
+  parentResult: boolean = null
+): boolean {
+  if (!command) return false;
+
+  const value = parseValue(entity[command.value]);
+  const compareValue = parseValue(command.value);
+  let valid = false;
+  if (command.operator === operator.contains) {
+    valid = value.indexOf(compareValue) > -1;
+  } else if (command.operator === operator.startswith) {
+    valid = value.startWith(compareValue);
+  } else if (command.operator === operator.endswith) {
+    valid = value.endsWith(compareValue);
+  } else if (command.operator === operator.eq) {
+    valid = value === compareValue;
+  } else if (command.operator === operator.ge) {
+    valid = value >= compareValue;
+  } else if (command.operator === operator.gt) {
+    valid = value > compareValue;
+  } else if (command.operator === operator.le) {
+    valid = value <= compareValue;
+  } else if (command.operator === operator.lt) {
+    valid = value < compareValue;
+  } else if (command.operator === operator.ne) {
+    valid = value != compareValue;
+  }
+
+  if(command.not){
+    valid = !valid;
+  }
+
+  if(command.filterTypes.length > 0){
+    for(var childCommand of command.filterTypes){
+      valid = isValid(entity, childCommand, command, valid);
+    }
+  }
+
+  valid = parentCommand!=null ? (parentCommand.logicalOperator === logicalOperator.and ? 
+    parentResult && valid : parentResult || valid) : valid;
+  return valid;
+}
+
 export function filter(entities: Entity[], webOption: WebApiOption): Entity[] {
   const resultEntities: Entity[] = [];
   const valid =
     entities && entities.length > 0 && webOption && webOption.filter !== '';
   if (!valid) return resultEntities;
 
-  const commands = getCommands(webOption.filter);
+  const commands = getHierarchyCommands(webOption.filter);
   for (const entity of entities) {
     let result = true;
+    let lastLogicalOperator: logicalOperator = null;
     for (const command of commands) {
-      const currentAttributeValue = entity[command.attributeName];
-      switch (command.operator) {
-        case operator.eq:
-          result = currentAttributeValue === command.value;
-          break;
-      }
+      const temp = isValid(entity, command);
 
+      result =
+        lastLogicalOperator != null
+          ? lastLogicalOperator === logicalOperator.and
+            ? result && temp
+            : result || temp
+          : temp;
+      lastLogicalOperator = command.logicalOperator;
       if (!result) break;
     }
 
@@ -85,8 +157,7 @@ function setRefrentialCommands(
     parentHierarchy.filterTypes = parentHierarchy.filterTypes.concat(
       currentHierarchy
     );
-  }
-  else if (
+  } else if (
     commands.length > 0 &&
     currentCommand.bracketOpenCt != currentCommand.bracketCloseCt
   ) {
@@ -251,8 +322,8 @@ export function getCommands(query: string): filterType[] {
         specialStr.trim().indexOf('contains(') > -1
           ? operator.contains
           : specialStr.trim().indexOf('endswith(') > -1
-            ? operator.endswith
-            : operator.startswith;
+          ? operator.endswith
+          : operator.startswith;
 
       var isNot = datum.text.startsWith('not ');
 
@@ -291,14 +362,14 @@ export function getCommands(query: string): filterType[] {
         operatorStr.trim() === 'eq'
           ? operator.eq
           : operatorStr.trim() === 'ne'
-            ? operator.ne
-            : operatorStr.trim() === 'gt'
-              ? operator.gt
-              : operatorStr.trim() === 'ge'
-                ? operator.ge
-                : operatorStr.trim() === 'lt'
-                  ? operator.lt
-                  : operator.le;
+          ? operator.ne
+          : operatorStr.trim() === 'gt'
+          ? operator.gt
+          : operatorStr.trim() === 'ge'
+          ? operator.ge
+          : operatorStr.trim() === 'lt'
+          ? operator.lt
+          : operator.le;
       const attributeData = getAttributeData(data[0]);
       const commonData = parsingValue(data[1]);
       const filter: filterType = {
