@@ -40,18 +40,17 @@ export interface filterType {
 }
 
 export function parseValue(value: any) {
-  //string | number | boolean | null
-  if(value === null || value === undefined) return value;
+  if (value === null || value === undefined) return value;
 
   if (Number(value)) {
     return Number(value);
-  } 
+  }
 
   const boolValue = value as boolean;
-  if(boolValue) {
+  if (boolValue) {
     return boolValue;
   }
-  
+
   const stringValue = value as string;
   let date = new Date(stringValue);
 
@@ -70,7 +69,7 @@ function isValid(
 ): boolean {
   if (!command) return false;
 
-  const value = parseValue(entity[command.value]);
+  const value = parseValue(entity[command.attributeName]);
   const compareValue = parseValue(command.value);
   let valid = false;
   if (command.operator === operator.contains) {
@@ -93,18 +92,23 @@ function isValid(
     valid = value != compareValue;
   }
 
-  if(command.not){
+  if (command.not) {
     valid = !valid;
   }
 
-  if(command.filterTypes.length > 0){
-    for(var childCommand of command.filterTypes){
+  if (command.filterTypes.length > 0) {
+    for (var childCommand of command.filterTypes) {
       valid = isValid(entity, childCommand, command, valid);
     }
   }
 
-  valid = parentCommand!=null ? (parentCommand.logicalOperator === logicalOperator.and ? 
-    parentResult && valid : parentResult || valid) : valid;
+  valid =
+    parentCommand != null
+      ? (parentCommand.logicalOperator || command.logicalOperator) ===
+        logicalOperator.and
+        ? parentResult && valid
+        : parentResult || valid
+      : valid;
   return valid;
 }
 
@@ -119,8 +123,11 @@ export function filter(entities: Entity[], webOption: WebApiOption): Entity[] {
     let result = true;
     let lastLogicalOperator: logicalOperator = null;
     for (const command of commands) {
-      const temp = isValid(entity, command);
+      if (!lastLogicalOperator && !command.logicalOperator) {
+        lastLogicalOperator = command.logicalOperator;
+      }
 
+      const temp = isValid(entity, command);
       result =
         lastLogicalOperator != null
           ? lastLogicalOperator === logicalOperator.and
@@ -410,19 +417,6 @@ function getAttributeData(
     bracketOpenCt: found,
     attributeName: attributeName.substring(found, attributeName.length),
   };
-}
-
-function removeOccurrence(
-  text: string,
-  logicalOperatorStr: string,
-  existTextes: string[]
-) {
-  text = text.split(logicalOperatorStr).join('').trim();
-  for (const temp of existTextes) {
-    text = text.split(temp).join('').trim();
-  }
-
-  return text.trim();
 }
 
 function setIsNot(filterType: filterType): filterType {
