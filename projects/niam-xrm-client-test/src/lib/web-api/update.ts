@@ -1,4 +1,4 @@
-import { Entity } from '../definitions/entity';
+import { Entity } from '../definitions';
 
 export function update(source: Entity, target: Entity): Entity {
   const excludeAttributes = ['id', 'logicalName'];

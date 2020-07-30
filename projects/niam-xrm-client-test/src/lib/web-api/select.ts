@@ -1,5 +1,4 @@
-import { Entity } from '../definitions/entity';
-import { WebApiOption } from '../definitions';
+import { Entity, WebApiOption } from '../definitions';
 
 export function select(entity: Entity, webOption: WebApiOption): Entity {
   const valid = webOption && webOption.select && webOption.select !== '';

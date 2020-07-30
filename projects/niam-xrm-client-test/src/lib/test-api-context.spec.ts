@@ -2,7 +2,7 @@ import { expect, assert } from 'chai';
 import 'mocha';
 import { TestApiContext } from './test-api-context';
 import { v4 as guid } from 'uuid';
-import { Entity } from './definitions/entity';
+import { Entity } from './definitions';
 
 describe('test-api-context', () => {
   let context: TestApiContext;

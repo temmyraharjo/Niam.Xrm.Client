@@ -1,11 +1,7 @@
-import { Entity } from './definitions/entity';
+import { Entity } from './definitions';
 import { v4 as guid } from 'uuid';
-import { toEntity } from './utils/to-entity';
-import { update } from './web-api/update';
-import { toWebApiEntity } from './utils/to-web-api-entity';
-import { getWebApiOption } from './utils/get-web-api-option';
-import { select } from './web-api/select';
-import { filter } from './web-api/filter'
+import { getWebApiOption, toWebApiEntity, toEntity } from './utils';
+import { select, update, filter, top, order } from './web-api';
 
 export class InMemoryWebApi implements Xrm.WebApi {
   constructor(private testContext: TestApiContext) {}
@@ -133,9 +129,13 @@ export class InMemoryWebApi implements Xrm.WebApi {
             entities: [],
             nextLink: null,
           };
-          const entitiesByLogicalName = this.getEntitiesByLogicalName(entityLogicalName);
+          const entitiesByLogicalName = this.getEntitiesByLogicalName(
+            entityLogicalName
+          );
           const webOption = getWebApiOption(options);
           result.entities = filter(entitiesByLogicalName, webOption);
+          result.entities = order(entitiesByLogicalName, webOption);
+          result.entities = top(result.entities, webOption);
           resolve(result);
         } catch (ex) {
           reject(ex);
