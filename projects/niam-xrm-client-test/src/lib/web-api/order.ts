@@ -9,6 +9,8 @@ export function order(
   entities: Entity[],
   webApiOption: WebApiOption
 ): Entity[] {
+  if(!webApiOption.orderby) return entities;
+  
   const orders = webApiOption.orderby.split(',').map((text) => {
     const commands = text.split(' ');
     return {
