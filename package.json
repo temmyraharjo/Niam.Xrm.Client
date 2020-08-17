@@ -1,0 +1,20 @@
+{
+    "name": "niam-xrm-client",
+    "version": "0.0.1",
+    "description": "Dynamics 365 client framework",
+    "main": "index.js",
+    "repository": "git@github.com:temmyraharjo/Niam.Xrm.Client.git",
+    "author": "Khairuddin Ni'am <niam.nfinity@gmail.com>",
+    "license": "MIT",
+    "private": true,
+    "workspaces": [
+        "projects/niam-xrm-client",
+        "projects/examples",
+        "projects/niam-xrm-client-test"
+    ],
+    "scripts": {
+        "fx": "yarn workspace @niam/xrm-client",
+        "test": "yarn workspace @niam/xrm-client-test",
+        "examples": "yarn workspace examples"
+    }
+}
