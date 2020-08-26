@@ -1,4 +1,4 @@
-import { Entity, WebApiOption } from '../definitions';
+import { Entity, WebEntity, WebApiOption } from '../definitions';
 
 // https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/webapi/query-data-web-api
 export enum operator {
@@ -61,6 +61,15 @@ export function parseValue(value: any) {
   return stringValue;
 }
 
+function getExpandValue(attribute: string, entity: Entity): any {
+  const keys = attribute.split('/');
+  if (keys.length != 2) return null;
+  const entityAttribute = keys[0];
+  const valueAttribute = keys[1];
+  const entityObj = entity[entityAttribute] as WebEntity;
+  return entityObj ? entityObj[valueAttribute] : null;
+}
+
 function isValid(
   entity: Entity,
   command: hierarchyFilterType,
@@ -69,7 +78,10 @@ function isValid(
 ): boolean {
   if (!command) return false;
 
-  const value = parseValue(entity[command.attributeName]);
+  const value =
+    command.attributeName.indexOf('/') > -1
+      ? getExpandValue(command.attributeName, entity)
+      : parseValue(entity[command.attributeName]);
   const compareValue = parseValue(command.value);
   let valid = false;
   if (command.operator === operator.contains) {

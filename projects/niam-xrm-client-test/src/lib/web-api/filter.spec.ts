@@ -8,7 +8,7 @@ import {
   filter,
 } from './filter';
 import { expect } from 'chai';
-import { Entity } from '../definitions/entity';
+import { Entity } from '../definitions';
 
 describe('filter tests', () => {
   describe('filter function', () => {
@@ -32,7 +32,8 @@ describe('filter tests', () => {
         'statecode@OData.Community.Display.V1.FormattedValue': 'Active',
         statecode: 0,
         emailaddress1: 'vlauriant@adatum.com',
-        'exchangerate@OData.Community.Display.V1.FormattedValue': '1.0000000000',
+        'exchangerate@OData.Community.Display.V1.FormattedValue':
+          '1.0000000000',
         exchangerate: 1,
         'openrevenue_state@OData.Community.Display.V1.FormattedValue': '1',
         openrevenue_state: 1,
@@ -98,7 +99,8 @@ describe('filter tests', () => {
         'timezoneruleversionnumber@OData.Community.Display.V1.FormattedValue':
           '0',
         timezoneruleversionnumber: 0,
-        'revenue@OData.Community.Display.V1.FormattedValue': 'RM1,000,000,000.00',
+        'revenue@OData.Community.Display.V1.FormattedValue':
+          'RM1,000,000,000.00',
         revenue: 1000000000,
         'address2_freighttermscode@OData.Community.Display.V1.FormattedValue':
           'Default Value',
@@ -153,7 +155,8 @@ describe('filter tests', () => {
         shippingmethodcode: 1,
         '_createdby_value@OData.Community.Display.V1.FormattedValue':
           'Jamie Reding (Sample Data)',
-        '_createdby_value@Microsoft.Dynamics.CRM.lookuplogicalname': 'systemuser',
+        '_createdby_value@Microsoft.Dynamics.CRM.lookuplogicalname':
+          'systemuser',
         _createdby_value: 'a1dfc355-d47c-455e-8ceb-9dc980f62d6d',
         address1_city: 'Guangzhou',
         'territorycode@OData.Community.Display.V1.FormattedValue':
@@ -165,7 +168,8 @@ describe('filter tests', () => {
         'msdyn_taxexempt@OData.Community.Display.V1.FormattedValue': 'No',
         msdyn_taxexempt: false,
         address1_addressid: '43ef81bb-754a-47ba-a8ef-d164099968bb',
-        'participatesinworkflow@OData.Community.Display.V1.FormattedValue': 'No',
+        'participatesinworkflow@OData.Community.Display.V1.FormattedValue':
+          'No',
         participatesinworkflow: false,
         'accountclassificationcode@OData.Community.Display.V1.FormattedValue':
           'Default Value',
@@ -285,11 +289,37 @@ describe('filter tests', () => {
       };
       const command =
         'accountid eq ' + entityId + ' and address1_postalcode eq "650031"';
-      const result = filter([record], {filter: command});
+      const result = filter([record], { filter: command });
+      expect(result.length).to.equal(1);
+    });
+
+    it('filter expand data', () => {
+      const record: Entity = {
+        id: '39dd0b31-ed8b-e511-80d2-00155d2a68d4',
+        logicalName: 'incident',
+        '@odata.context':
+          '[Organization URI]/api/data/v9.1/$metadata#incidents(title,_customerid_value,customerid_contact(fullname))/$entity',
+        '@odata.etag': 'W/"504696"',
+        '_customerid_value@Microsoft.Dynamics.CRM.associatednavigationproperty':
+          'customerid_contact',
+        '_customerid_value@Microsoft.Dynamics.CRM.lookuplogicalname': 'contact',
+        '_customerid_value@OData.Community.Display.V1.FormattedValue':
+          'Susanna Stubberod (sample)',
+        _customerid_value: '7ddd0b31-ed8b-e511-80d2-00155d2a68d4',
+        incidentid: '39dd0b31-ed8b-e511-80d2-00155d2a68d4',
+        customerid_contact: {
+          '@odata.etag': 'W/"503587"',
+          fullname: 'Susanna Stubberod (sample)',
+          contactid: '7ddd0b31-ed8b-e511-80d2-00155d2a68d4',
+        },
+      };
+
+      const command = 'incidentid eq 39dd0b31-ed8b-e511-80d2-00155d2a68d4 and customerid_contact/contactid eq 7ddd0b31-ed8b-e511-80d2-00155d2a68d4';
+      const result = filter([record], { filter: command });
       expect(result.length).to.equal(1);
     });
   });
-  
+
   describe('getting value', () => {
     it('it can parsing value', () => {
       let value = "'('123-'123')'";
