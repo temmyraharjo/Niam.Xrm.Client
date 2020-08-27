@@ -1,8 +1,15 @@
-import { Entity, WebApiOption } from '../definitions';
+import { Entity, WebApiOption, WebEntity } from '../definitions';
 
-export function select(entity: Entity, webOption: WebApiOption): Entity {
+export function select<T extends WebEntity>(
+  entity: T,
+  webOption: WebApiOption
+): T;
+export function select<T extends Entity>(
+  entity: Entity,
+  webOption: WebApiOption
+): T {
   const valid = webOption && webOption.select && webOption.select !== '';
-  if (!valid) return entity;
+  if (!valid) return entity as T;
 
   const entityAttributes = Object.keys(entity);
   const result = webOption.select
@@ -20,10 +27,12 @@ export function select(entity: Entity, webOption: WebApiOption): Entity {
       }
 
       return e;
-    }, {} as Entity);
+    }, {} as WebEntity);
 
-  result.id = entity.id;
-  result.logicalName = entity.logicalName;
+  if (entity.logicalName) {
+    result.id = entity.id;
+    result.logicalName = entity.logicalName;
+  }
 
-  return result;
+  return result as T;
 }

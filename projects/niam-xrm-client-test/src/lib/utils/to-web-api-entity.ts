@@ -1,4 +1,4 @@
-import { Entity, WebEntity } from '../definitions/entity';
+import { Entity, WebEntity } from '../definitions';
 
 export function toWebApiEntity(entity: Entity): WebEntity {
     const excludeAttributes = ['id', 'logicalName'];

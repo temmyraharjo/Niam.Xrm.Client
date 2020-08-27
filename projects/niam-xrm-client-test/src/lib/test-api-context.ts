@@ -1,7 +1,7 @@
 import { Entity } from './definitions';
 import { v4 as guid } from 'uuid';
 import { getWebApiOption, toWebApiEntity, toEntity } from './utils';
-import { select, update, filter, top, order } from './web-api';
+import { select, update, filter, top, order, expand } from './web-api';
 
 export class InMemoryWebApi implements Xrm.WebApi {
   constructor(private testContext: TestApiContext) {}
@@ -136,6 +136,7 @@ export class InMemoryWebApi implements Xrm.WebApi {
           result.entities = filter(entitiesByLogicalName, webOption);
           result.entities = order(entitiesByLogicalName, webOption);
           result.entities = top(result.entities, webOption);
+          result.entities = expand(result.entities, webOption);
           resolve(result);
         } catch (ex) {
           reject(ex);
