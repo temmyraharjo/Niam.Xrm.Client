@@ -14,7 +14,7 @@
     ],
     "scripts": {
         "fx": "yarn workspace @niam/xrm-client",
-        "test": "yarn workspace @niam/xrm-client-test",
+        "fx-test": "yarn workspace @niam/xrm-client-test",
         "examples": "yarn workspace examples"
     }
 }

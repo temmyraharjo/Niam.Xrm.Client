@@ -1,5 +1,5 @@
 import { Entity } from './definitions';
-import { v4 as guid } from 'uuid';
+import { guid } from './utils/guid';
 import { getWebApiOption, toWebApiEntity, toEntity } from './utils';
 import { select, update, filter, top, order, expand } from './web-api';
 

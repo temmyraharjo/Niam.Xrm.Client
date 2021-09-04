@@ -5,11 +5,92 @@ import { toWebApiEntityRequest } from './to-web-api-entity-request';
 
 export class OrganizationService {
   constructor(
-    private readonly webApi: Xrm.WebApi,
+    public readonly webApi: Xrm.WebApi,
     private readonly metadata: EntityMetadata[]
-  ) {}
+  ) { }
 
-  // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/xrm-webapi/retrieverecord
+  execute(request: any) {
+    return new Promise((resolve, reject) => {
+      this.webApi.online.execute(request).then(
+        (response) => resolve(response),
+        (error) => reject(error)
+      );
+    });
+  }
+  executeMultiple(request: any[]) {
+    return new Promise((resolve, reject) => {
+      this.webApi.online.executeMultiple(request).then(
+        (response) => resolve(response),
+        (error) => reject(error)
+      );
+    });
+  }
+
+  retrieveMultiple(entityLogicalName: string, options?: string, maxPageSize?: number)
+    : Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.webApi.retrieveMultipleRecords(entityLogicalName, options, maxPageSize).then(
+        (response) => resolve(response),
+        (error) => reject(error)
+      );
+    });
+  }
+
+  retrieveRecord(entityLogicalName: string, id: string, options?: string) {
+    return new Promise((resolve, reject) => {
+      this.webApi.retrieveRecord(entityLogicalName, id, options).then(
+        (response) => resolve(response),
+        (error) => reject(error)
+      );
+    });
+  }
+
+  create<TEntity extends Entity = Entity>(
+    entityLogicalName: string,
+    entity: TEntity
+  ): Promise<Xrm.CreateResponse> {
+    return new Promise((resolve, reject) => {
+      const webapiEntity = toWebApiEntityRequest(
+        this.metadata,
+        entityLogicalName,
+        entity
+      );
+
+      this.webApi.createRecord(entityLogicalName, webapiEntity).then(
+        (response) => resolve(response),
+        (error) => reject(error)
+      );
+    });
+  }
+
+  delete(entityLogicalName: string, id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.webApi.deleteRecord(entityLogicalName, id).then(
+        () => resolve(),
+        (error) => reject(error)
+      );
+    });
+  }
+
+  update<TEntity extends Entity = Entity>(
+    entityLogicalName: string,
+    id: string,
+    entity: TEntity
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const webapiEntity = toWebApiEntityRequest(
+        this.metadata,
+        entityLogicalName,
+        entity
+      );
+
+      this.webApi.updateRecord(entityLogicalName, id, webapiEntity).then(
+        () => resolve(),
+        (error) => reject(error)
+      );
+    });
+  }
+
   retrieve<TEntity extends Entity = Entity>(
     lookup: Xrm.LookupValue,
     attributes?: KeyOf<TEntity>[]
@@ -74,54 +155,6 @@ export class OrganizationService {
           const result = toEntity<TEntity>(entityMetadata, response);
           resolve(result);
         },
-        (error) => reject(error)
-      );
-    });
-  }
-  // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/xrm-webapi/createrecord
-  create<TEntity extends Entity = Entity>(
-    entityLogicalName: string,
-    entity: TEntity
-  ): Promise<Xrm.CreateResponse> {
-    return new Promise((resolve, reject) => {
-      const webapiEntity = toWebApiEntityRequest(
-        this.metadata,
-        entityLogicalName,
-        entity
-      );
-
-      this.webApi.createRecord(entityLogicalName, webapiEntity).then(
-        (response) => resolve(response),
-        (error) => reject(error)
-      );
-    });
-  }
-
-  // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/Xrm-WebApi/deleteRecord
-  delete(entityLogicalName: string, id: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.webApi.deleteRecord(entityLogicalName, id).then(
-        () => resolve(),
-        (error) => reject(error)
-      );
-    });
-  }
-
-  // https://docs.microsoft.com/en-us/powerapps/developer/model-driven-apps/clientapi/reference/xrm-webapi/updaterecord
-  update<TEntity extends Entity = Entity>(
-    entityLogicalName: string,
-    id: string,
-    entity: TEntity
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const webapiEntity = toWebApiEntityRequest(
-        this.metadata,
-        entityLogicalName,
-        entity
-      );
-
-      this.webApi.updateRecord(entityLogicalName, id, webapiEntity).then(
-        () => resolve(),
         (error) => reject(error)
       );
     });
